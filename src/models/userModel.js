@@ -30,7 +30,6 @@ const UserSchema = new mongoose.Schema({
     },
     instituteName: {
         type: String,
-        required: true,
         trim: true,
     },
     instituteRef: {
@@ -51,7 +50,6 @@ const UserSchema = new mongoose.Schema({
     }],
     IdProof: {
         type: String,
-        required: true,
         trim: true,
     },
     isVerified: {
