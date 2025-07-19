@@ -2,16 +2,18 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import User from "@/models/User";
+import User from "@/models/userModel";
 import dbConnect from "@/lib/dbConnect";
 
 const handler = NextAuth({
   providers: [
+    // Google Sign-In
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
 
+    // Credentials Sign-In
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -22,7 +24,11 @@ const handler = NextAuth({
         await dbConnect();
 
         const user = await User.findOne({ email: credentials.email }).select("+password");
+
         if (!user) throw new Error("No user found");
+        if (user.authProvider !== "credentials") {
+          throw new Error("Please sign in using Google");
+        }
 
         const isMatch = await bcrypt.compare(credentials.password, user.password);
         if (!isMatch) throw new Error("Invalid password");
@@ -46,14 +52,24 @@ const handler = NextAuth({
       await dbConnect();
 
       if (user) {
-        const existingUser = await User.findOne({ email: user.email });
+        let existingUser = await User.findOne({ email: user.email });
 
+        // If user doesn't exist (Google login), create new one
         if (!existingUser) {
+          const baseUsername = user.email.split("@")[0];
+          let username = baseUsername;
+          let suffix = 1;
+
+          while (await User.exists({ username })) {
+            username = `${baseUsername}${suffix++}`;
+          }
+
           const newUser = await User.create({
             fullName: user.name || "No Name",
             email: user.email,
             profilePicture: user.image,
-            username: user.email.split("@")[0],
+            username,
+            authProvider: "google",
             instituteName: "Not Provided",
             isVerified: true,
           });
