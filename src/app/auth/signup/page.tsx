@@ -19,48 +19,31 @@ export default function SignupPage() {
   async function handleSubmit(e: any) {
     e.preventDefault();
     setLoading(true);
-
-    console.log("📤 Submitting form with data:", form);
-
     try {
       const res = await axios.post("/api/register", form);
-
-      console.log("✅ Response received:");
-      console.log("Status:", res.status);
-      console.log("Data:", res.data);
-
-      if (res.status >= 200 && res.status < 300) {
-        console.log("🎉 Signup successful! Redirecting to verification page...");
+        console.log(res.data);
         router.push(`/auth/verify?email=${encodeURIComponent(form.email)}`);
-      } else {
-        console.warn("⚠️ Signup failed with status code:", res.status);
-        console.warn("Error from server:", res.data?.error || "No error message provided");
-      }
-
+       
     } catch (err: any) {
-      console.error("❌ An error occurred during signup:");
 
       if (err.response) {
-        // Server responded with a status code outside the 2xx range
         console.error("Status:", err.response.status);
         console.error("Data:", err.response.data);
         console.error("Headers:", err.response.headers);
       } else if (err.request) {
-        // Request was made but no response received
+        
         console.error("No response received:", err.request);
       } else {
-        // Something else went wrong
         console.error("Error Message:", err.message);
       }
     } finally {
-      console.log("🔚 Finished signup request. Resetting loading state.");
       setLoading(false);
     }
   }
 
 
   return (
-    <div className="relative min-h-screen w-full bg-black text-white flex flex-row-reverse">
+    <div className="relative min-h-screen w-full bg-black text-white flex ">
 
       <div className="w-full lg:w-[30%] min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#111111] flex items-center justify-center px-6 py-10">
         <div className="absolute top-6 left-6">

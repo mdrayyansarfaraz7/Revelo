@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import bcrypt from "bcryptjs";
 import User from "@/models/userModel";
-import { sendVerificationEmail } from "@/lib/sendVerificationEmail"; 
+import { sendVerificationEmail } from "@/lib/sendVerificationEmail";
 
 export async function POST(req) {
   await dbConnect();
@@ -31,11 +31,11 @@ export async function POST(req) {
     const newUser = await User.create({
       username,
       email,
-       authProvider:"credentials",
+      authProvider: "credentials",
       password: hashedPassword,
       isVerified: false,
       verifyToken: verifyCode,
-      verifyTokenExpiry: Date.now() + 10 * 60 * 1000, 
+      verifyTokenExpiry: Date.now() + 10 * 60 * 1000,
     });
 
     await sendVerificationEmail(email, verifyCode);

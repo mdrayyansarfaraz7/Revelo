@@ -53,8 +53,7 @@ const handler = NextAuth({
 
       if (user) {
         let existingUser = await User.findOne({ email: user.email });
-
-        // If user doesn't exist (Google login), create new one
+        
         if (!existingUser) {
           const baseUsername = user.email.split("@")[0];
           let username = baseUsername;
