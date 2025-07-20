@@ -19,6 +19,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
+    "react-simple-typewriter": "^5.0.1",
     "react-spinner": "^0.2.7",
     "react-spinners": "^0.17.0",
     "resend": "^4.7.0"
