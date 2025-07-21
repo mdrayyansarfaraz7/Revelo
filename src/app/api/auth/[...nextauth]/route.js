@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/models/userModel";
 import dbConnect from "@/lib/dbConnect";
-
+import { sendVerificationEmail } from "@/lib/sendVerificationEmail";
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -31,6 +31,20 @@ const handler = NextAuth({
         const isMatch = await bcrypt.compare(credentials.password, user.password);
         if (!isMatch) throw new Error("Invalid password");
 
+        if (!user.isVerified) {
+          const isExpired = user.verifyTokenExpiry < Date.now();
+
+          if (isExpired) {
+            const newCode = Math.floor(100000 + Math.random() * 900000).toString(); 
+            user.verifyToken = newCode;
+            user.verifyTokenExpiry = Date.now() + 1000 * 60 * 10; 
+            await user.save();
+            await sendVerificationEmail(user.email, newCode);
+          }
+
+          throw new Error("Email not verified. We've sent a new verification code.");
+        }
+
         return {
           id: user._id,
           email: user.email,
@@ -51,7 +65,7 @@ const handler = NextAuth({
 
       if (user) {
         let existingUser = await User.findOne({ email: user.email });
-        
+
         if (!existingUser) {
           const baseUsername = user.email.split("@")[0];
           let username = baseUsername;

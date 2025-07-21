@@ -2,6 +2,7 @@
 import Category from "./components/Category";
 import Header from "./components/Header";
 import { Typewriter } from "react-simple-typewriter";
+import UpcomingSlider from "./components/UpcomingProgrammesSlider";
 
 export default function Home() {
   return (
@@ -25,8 +26,8 @@ export default function Home() {
             Discover & Participate in{" "} <br />
             <span className="text-[#c084fc]">
               <Typewriter
-                words={["Fests","Hackathons","Contests","Ideathons","Exhibitions","Debates","Cultural Shows"]}
-                loop={1}
+                words={["Fests", "Hackathons", "Contests", "Ideathons", "Exhibitions", "Debates", "Cultural Shows"]}
+                loop={0}
                 cursor
                 cursorStyle="|"
                 typeSpeed={90}
@@ -41,7 +42,8 @@ export default function Home() {
           </h3>
         </div>
       </div>
-      <Category/>
+      <Category />
+    <UpcomingSlider/>
     </div>
   );
 }

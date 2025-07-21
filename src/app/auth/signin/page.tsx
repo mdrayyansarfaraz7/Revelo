@@ -9,23 +9,37 @@ import Image from "next/image";
 export default function SigninPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(""); 
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const res = await signIn("credentials", {
-      redirect: false,
-      ...form,
-    });
-    setLoading(false);
-    if (res?.ok) router.push("/");
-    else alert(res?.error);
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setLoading(true);
+
+  const res = await signIn("credentials", {
+    redirect: false,
+    ...form,
+  });
+
+  setLoading(false);
+
+  if (res?.ok) {
+    router.push("/");
+  } else {
+    const error = res?.error || "Login failed";
+
+    if (error.includes("Email not verified")) {
+      router.push(`/auth/verify?email=${encodeURIComponent(form.email)}`);
+    } else {
+      setError(error);
+    }
   }
+}
 
   return (
     <div className="relative min-h-screen w-full bg-black text-white flex ">
@@ -40,8 +54,8 @@ export default function SigninPage() {
             className="object-contain"
             priority
           />
-
         </div>
+
         <motion.div
           className="w-full max-w-sm"
           initial={{ opacity: 0, y: 40 }}
@@ -53,7 +67,6 @@ export default function SigninPage() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-            
             <input
               name="email"
               type="email"
@@ -72,6 +85,10 @@ export default function SigninPage() {
               className="w-full px-4 py-2 rounded bg-[#1a1a1a] border border-[#333] focus:outline-none focus:border-purple-400 text-sm placeholder-gray-400"
             />
 
+            {error && (
+              <p className="text-red-500 text-sm -mt-2">{error}</p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -87,9 +104,8 @@ export default function SigninPage() {
             <div className="h-[1px] bg-gray-700 w-full"></div>
           </div>
 
-          {/* Google Button */}
           <button
-            onClick={() => signIn("google",{ callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl: "/" })}
             className="w-full mt-4 bg-[#1a1a1a] text-white py-2 rounded flex items-center justify-center gap-3 font-medium hover:shadow-[0_0_10px_#c084fc66] transition-all border border-gray-700"
           >
             <svg
@@ -103,7 +119,6 @@ export default function SigninPage() {
             Continue with Google
           </button>
 
-          {/* Sign-up Redirect */}
           <p className="mt-6 text-sm text-center text-gray-400">
             Don’t have an account?{" "}
             <a
@@ -116,7 +131,7 @@ export default function SigninPage() {
         </motion.div>
       </div>
 
-      {/* Right Panel - Hidden on small screens */}
+      {/* Right Panel */}
       <div className="w-[70%] relative hidden lg:block">
         <Image
           src="/login.png"
