@@ -1,4 +1,5 @@
 'use client';
+import Category from "./components/Category";
 import Header from "./components/Header";
 import { Typewriter } from "react-simple-typewriter";
 
@@ -16,7 +17,7 @@ export default function Home() {
 
         {/* Hero Content */}
         <div className="relative z-20 px-8 md:px-16 max-w-5xl">
-          <p className="text-xl uppercase tracking-widest text-gray-400 mb-2">
+          <p className="text-3xl uppercase tracking-widest text-gray-400 mb-2 ">
             Welcome to Revelo.in
           </p>
 
@@ -24,20 +25,12 @@ export default function Home() {
             Discover & Participate in{" "} <br />
             <span className="text-[#c084fc]">
               <Typewriter
-                words={[
-                  "Fests",
-                  "Hackathons",
-                  "Contests",
-                  "Ideathons",
-                  "Exhibitions",
-                  "Debates",
-                  "Cultural Shows",
-                ]}
-                loop={0}
+                words={["Fests","Hackathons","Contests","Ideathons","Exhibitions","Debates","Cultural Shows"]}
+                loop={1}
                 cursor
                 cursorStyle="|"
                 typeSpeed={90}
-                deleteSpeed={60}
+                deleteSpeed={40}
                 delaySpeed={1500}
               />
             </span>
@@ -48,6 +41,7 @@ export default function Home() {
           </h3>
         </div>
       </div>
+      <Category/>
     </div>
   );
 }

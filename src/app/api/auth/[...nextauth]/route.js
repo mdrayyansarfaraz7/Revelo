@@ -7,13 +7,11 @@ import dbConnect from "@/lib/dbConnect";
 
 const handler = NextAuth({
   providers: [
-    // Google Sign-In
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
 
-    // Credentials Sign-In
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -36,7 +34,7 @@ const handler = NextAuth({
         return {
           id: user._id,
           email: user.email,
-          name: user.fullName,
+          name: user.username,
           image: user.profilePicture,
         };
       },
@@ -76,14 +74,14 @@ const handler = NextAuth({
           token.user = {
             id: newUser._id,
             email: newUser.email,
-            name: newUser.fullName,
+            name: newUser.username,
             image: newUser.profilePicture,
           };
         } else {
           token.user = {
             id: existingUser._id,
             email: existingUser.email,
-            name: existingUser.fullName,
+            name: existingUser.username,
             image: existingUser.profilePicture,
           };
         }

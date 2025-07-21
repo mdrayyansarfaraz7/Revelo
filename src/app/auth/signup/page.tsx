@@ -113,7 +113,7 @@ export default function SignupPage() {
 
           {/* Google Button */}
           <button
-            onClick={() => signIn("google")}
+            onClick={() => signIn("google",{ callbackUrl: "/" })}
             className="w-full mt-4 bg-[#1a1a1a] text-white py-2 rounded flex items-center justify-center gap-3 font-medium hover:shadow-[0_0_10px_#c084fc66] transition-all border border-gray-700"
           >
             <svg
