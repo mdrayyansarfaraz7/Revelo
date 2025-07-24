@@ -27,20 +27,20 @@ const InstituteSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    officeEmail:{
+    officeEmail: {
         type: String,
         required: true,
         trim: true,
         lowercase: true,
-        unique:true
+        unique: true
     },
-    logo:{
+    logo: {
         type: String,
         required: true,
         trim: true
     },
     isVerified: {
-        type: Boolean, 
+        type: Boolean,
         default: false
     },
     verificationStatus: {
@@ -53,22 +53,31 @@ const InstituteSchema = new mongoose.Schema({
         enum: ['school', 'institute', 'university'],
         required: true
     },
-    password:{
+    password: {
         type: String,
         required: true,
         trim: true,
         select: false
     },
-    events:[
+    verificationLetter: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    verificationDate: {
+        type: Date,
+        default: null
+    },
+    events: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Event'
         }
     ]
-},{
-    timestamps:true
+}, {
+    timestamps: true
 });
 
-const Institute =mongoose.models.Institute || mongoose.model('Institute', InstituteSchema);
+const Institute = mongoose.models.Institute || mongoose.model('Institute', InstituteSchema);
 
 export default Institute;
