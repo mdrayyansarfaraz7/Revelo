@@ -1,28 +1,11 @@
 import dbConnect from '@/lib/dbConnect';
-import Institute from '@/models/Institute';
-import upload from '@/lib/multer';
-import nextConnect from 'next-connect';
+import Institute from '@/models/instituteModel';
 import bcrypt from 'bcryptjs';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const handler = nextConnect();
-
-handler.use(
-  upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'verificationLetter', maxCount: 1 },
-  ])
-);
-
-handler.post(async (req, res) => {
-  await dbConnect();
-
+export async function POST(req) {
   try {
+    const body = await req.json();
+
     const {
       instituteName,
       address,
@@ -32,25 +15,30 @@ handler.post(async (req, res) => {
       officeEmail,
       password,
       instituteType,
-    } = req.body;
+      logoUrl,
+      verificationLetterUrl,
+    } = body;
 
+    // Basic validation
     if (
       !instituteName || !address || !state || !country || !contactNumber ||
-      !officeEmail || !password || !instituteType ||
-      !req.files['logo'] || !req.files['verificationLetter']
+      !officeEmail || !password || !instituteType || !logoUrl || !verificationLetterUrl
     ) {
-      return res.status(400).json({ error: 'Missing required fields or files' });
+      return new Response(JSON.stringify({ error: 'All fields are required' }), {
+        status: 400,
+      });
     }
 
+    await dbConnect();
+
     const existing = await Institute.findOne({
-      $or: [
-        { instituteName: instituteName },
-        { officeEmail: officeEmail },
-      ],
+      $or: [{ instituteName }, { officeEmail }],
     });
 
     if (existing) {
-      return res.status(409).json({ error: 'Institute already exists' });
+      return new Response(JSON.stringify({ error: 'Institute already exists' }), {
+        status: 409,
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,18 +52,21 @@ handler.post(async (req, res) => {
       officeEmail,
       instituteType,
       password: hashedPassword,
-      logo: req.files['logo'][0].path,
-      verificationLetter: req.files['verificationLetter'][0].path,
+      logo: logoUrl,
+      verificationLetter: verificationLetterUrl,
     });
 
-    res.status(201).json({
-      message: 'Institute registered successfully',
-      instituteId: newInstitute._id,
-    });
+    return new Response(
+      JSON.stringify({
+        message: 'Institute registered successfully',
+        instituteId: newInstitute._id,
+      }),
+      { status: 201 }
+    );
   } catch (err) {
-    console.error('[REGISTER INSTITUTE]', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('🔴 Error registering institute:', err);
+    return new Response(JSON.stringify({ error: 'Server error' }), {
+      status: 500,
+    });
   }
-});
-
-export default handler;
+}

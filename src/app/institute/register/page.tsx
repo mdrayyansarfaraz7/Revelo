@@ -11,13 +11,28 @@ import {
     Select, SelectTrigger, SelectContent, SelectItem, SelectValue
 } from "@/components/ui/select"
 import { useEffect, useState } from "react"
-import { UploadCloud } from "lucide-react"
+import { UploadCloud, Loader2 } from "lucide-react"
+import axios from "axios"
+import { toast } from "sonner"
+import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
 
 export default function InstituteRegisterPage() {
-    const [logoName, setLogoName] = useState("")
-    const [letterName, setLetterName] = useState("")
+    const [instituteName, setInstituteName] = useState("");
+    const [instituteType, setInstituteType] = useState("")
+    const [officeEmail, setOfficeEmail] = useState("")
+    const [contactNumber, setContactNumber] = useState("")
+    const [address, setAddress] = useState("")
+    const [state, setState] = useState("")
+    const [country, setCountry] = useState("")
+    const [password, setPassword] = useState("")
+    const [verificationLetter, setVerificationLetter] = useState<File | null>(null)
     const [logoFile, setLogoFile] = useState<File | null>(null)
+
+    const [letterName, setLetterName] = useState("")
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
+
+    const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         if (logoFile) {
@@ -27,9 +42,50 @@ export default function InstituteRegisterPage() {
         }
     }, [logoFile])
 
+    const handleSubmit = async () => {
+        setLoading(true);
+        setSuccessMessage("");
+
+        try {
+            let logoUrl = "";
+            let verificationLetterUrl = "";
+
+            // 🟣 Upload logo to Cloudinary
+            if (logoFile) {
+                logoUrl = await uploadToCloudinary(logoFile);
+            }
+
+            // 🟣 Upload verification letter to Cloudinary
+            if (verificationLetter) {
+                verificationLetterUrl = await uploadToCloudinary(verificationLetter);
+            }
+
+            // 🟢 Final payload (plain JSON)
+            const payload = {
+                instituteName,
+                instituteType,
+                officeEmail,
+                contactNumber,
+                address,
+                state,
+                country,
+                password,
+                logoUrl,
+                verificationLetterUrl,
+            };
+
+            await axios.post("/api/register-institute", payload); // No multipart/form-data
+
+            setSuccessMessage("Your account will be activated within 24 hours. You may log in afterwards.");
+        } catch (error: any) {
+            toast.error(error?.response?.data?.error || "Registration failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="min-h-screen bg-[#111111] flex items-center justify-center px-4 py-10">
-            <Card className="w-full max-w-4xl bg-zinc-900 border border-zinc-800 text-white shadow-xl rounded-2xl">
+            <Card className="w-full max-w-6xl bg-zinc-900 border border-zinc-800 text-white shadow-xl rounded-2xl">
                 <CardHeader>
                     <CardTitle className="text-2xl font-semibold text-white">Institute Registration</CardTitle>
                 </CardHeader>
@@ -38,11 +94,11 @@ export default function InstituteRegisterPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <Label className="text-zinc-300" htmlFor="instituteName">Institute Name</Label>
-                            <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="instituteName" />
+                            <Input disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="instituteName" onChange={(e) => setInstituteName(e.target.value)} />
                         </div>
                         <div>
                             <Label className="text-zinc-300" htmlFor="instituteType">Institute Type</Label>
-                            <Select>
+                            <Select disabled={loading} onValueChange={setInstituteType}>
                                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-3" >
                                     <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
@@ -58,40 +114,36 @@ export default function InstituteRegisterPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <Label className="text-zinc-300" htmlFor="officeEmail">Official Email</Label>
-                            <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="officeEmail" type="email" />
+                            <Input disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="officeEmail" type="email" onChange={(e) => setOfficeEmail(e.target.value)} />
                         </div>
                         <div>
                             <Label className="text-zinc-300" htmlFor="contactNumber">Contact Number</Label>
-                            <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="contactNumber" />
+                            <Input disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="contactNumber" onChange={(e) => setContactNumber(e.target.value)} />
                         </div>
                     </div>
 
                     <div>
                         <Label className="text-zinc-300" htmlFor="address">Address</Label>
-                        <Textarea className="bg-zinc-800 text-white border-zinc-700 mt-3" id="address" rows={3} />
+                        <Textarea disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="address" rows={5} onChange={(e) => setAddress(e.target.value)} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <Label className="text-zinc-300" htmlFor="state">State</Label>
-                            <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="state" />
+                            <Input disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="state" onChange={(e) => setState(e.target.value)} />
                         </div>
                         <div>
                             <Label className="text-zinc-300" htmlFor="country">Country</Label>
-                            <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="country" />
+                            <Input disabled={loading} className="bg-zinc-800 text-white border-zinc-700 mt-3" id="country" onChange={(e) => setCountry(e.target.value)} />
                         </div>
                     </div>
-
-                    {/* Custom File Inputs */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Logo */}
                         <div>
                             <Label className="text-zinc-300">Institute Logo (PNG/JPEG)</Label>
                             <div>
-                            
                                 <div
                                     className="mt-2 flex items-center justify-between border border-dashed border-zinc-600 bg-zinc-800 rounded-md px-4 py-3 cursor-pointer hover:border-zinc-400 transition"
-                                    onClick={() => document.getElementById("logoUpload")?.click()}
+                                    onClick={() => !loading && document.getElementById("logoUpload")?.click()}
                                 >
                                     <div className="flex items-center gap-2 text-zinc-300">
                                         <UploadCloud className="w-4 h-4" />
@@ -101,6 +153,7 @@ export default function InstituteRegisterPage() {
                                         type="file"
                                         id="logoUpload"
                                         accept="image/*"
+                                        disabled={loading}
                                         onChange={(e) => {
                                             const file = e.target.files?.[0]
                                             if (file) setLogoFile(file)
@@ -109,7 +162,6 @@ export default function InstituteRegisterPage() {
                                     />
                                 </div>
 
-                                {/* Preview */}
                                 {logoPreview && (
                                     <div className="mt-4 flex items-center gap-4">
                                         <img
@@ -123,11 +175,10 @@ export default function InstituteRegisterPage() {
                             </div>
                         </div>
 
-                        {/* Verification Letter */}
                         <div>
                             <Label className="text-zinc-300">Verification Letter (PDF)</Label>
                             <div className="mt-2 flex items-center justify-between border border-dashed border-zinc-600 bg-zinc-800 rounded-md px-4 py-3 cursor-pointer hover:border-zinc-400 transition"
-                                onClick={() => document.getElementById("letterUpload")?.click()}
+                                onClick={() => !loading && document.getElementById("letterUpload")?.click()}
                             >
                                 <div className="flex items-center gap-2 text-zinc-300">
                                     <UploadCloud className="w-4 h-4" />
@@ -137,7 +188,14 @@ export default function InstituteRegisterPage() {
                                     type="file"
                                     id="letterUpload"
                                     accept="application/pdf"
-                                    onChange={(e) => setLetterName(e.target.files?.[0]?.name || "")}
+                                    disabled={loading}
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setVerificationLetter(file);
+                                            setLetterName(file.name);
+                                        }
+                                    }}
                                     className="hidden"
                                 />
                             </div>
@@ -146,21 +204,27 @@ export default function InstituteRegisterPage() {
 
                     <div>
                         <Label className="text-zinc-300" htmlFor="password">Create Password</Label>
-                        <Input className="bg-zinc-800 text-white border-zinc-700 mt-3" id="password" type="password" />
+                        <Input
+                            className="bg-zinc-800 text-white border-zinc-700 mt-3"
+                            id="password"
+                            type="password"
+                            disabled={loading}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </div>
+
+                    {successMessage && (
+                        <div className="text-green-400 text-sm pt-4">{successMessage}</div>
+                    )}
                 </CardContent>
 
                 <CardFooter className="flex justify-end gap-4 px-8 pb-8">
                     <Button
-                        variant="ghost"
-                        className="text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+                        disabled={loading}
+                        className="bg-white text-black hover:bg-zinc-200 transition font-semibold px-8 w-20"
+                        onClick={handleSubmit}
                     >
-                        Cancel
-                    </Button>
-                    <Button
-                        className="bg-white text-black hover:bg-zinc-200 transition font-semibold px-6"
-                    >
-                        Register
+                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Register"}
                     </Button>
                 </CardFooter>
             </Card>
