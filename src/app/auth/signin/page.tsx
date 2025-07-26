@@ -5,41 +5,50 @@ import { ClipLoader } from "react-spinners";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useEffect } from "react";
+
 
 export default function SigninPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  
+  useEffect(() => {
+    const token = localStorage.getItem('revelo_admin_token');
+    if (token) {
+      router.push('/admin/panel');
+    }
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(""); 
+    setError("");
   }
 
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setLoading(true);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
 
-  const res = await signIn("credentials", {
-    redirect: false,
-    ...form,
-  });
+    const res = await signIn("credentials", {
+      redirect: false,
+      ...form,
+    });
 
-  setLoading(false);
+    setLoading(false);
 
-  if (res?.ok) {
-    router.push("/");
-  } else {
-    const error = res?.error || "Login failed";
-
-    if (error.includes("Email not verified")) {
-      router.push(`/auth/verify?email=${encodeURIComponent(form.email)}`);
+    if (res?.ok) {
+      router.push("/");
     } else {
-      setError(error);
+      const error = res?.error || "Login failed";
+
+      if (error.includes("Email not verified")) {
+        router.push(`/auth/verify?email=${encodeURIComponent(form.email)}`);
+      } else {
+        setError(error);
+      }
     }
   }
-}
 
   return (
     <div className="relative min-h-screen w-full bg-black text-white flex ">

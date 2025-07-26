@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ClipLoader } from "react-spinners";
 import { signIn } from "next-auth/react";
@@ -15,6 +15,13 @@ export default function SignupPage() {
   function handleChange(e: any) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
+
+    useEffect(() => {
+      const token = localStorage.getItem('revelo_admin_token');
+      if (token) {
+        router.push('/admin/panel');
+      }
+    }, []);
 
   async function handleSubmit(e: any) {
     e.preventDefault();

@@ -3,9 +3,19 @@ import Category from "./components/Category";
 import Header from "./components/Header";
 import { Typewriter } from "react-simple-typewriter";
 import UpcomingSlider from "./components/UpcomingProgrammesSlider";
+import { useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem('revelo_admin_token');
+    if (token) {
+      router.push('/admin/panel');
+    }
+  }, []);
   return (
+
     <div className="bg-[#111111] min-h-screen text-white">
       <Header />
 
@@ -26,7 +36,7 @@ export default function Home() {
             Discover & Participate in{" "} <br />
             <span className="text-[#c084fc]">
               <Typewriter
-                words={["Fests", "Hackathons", "Contests", "Ideathons", "Exhibitions", "Debates", "Cultural Shows"]}
+                words={["Fests", "Hackathons", "Contests", "Ideathons", "Exhibitions", "Debates", "Cultural Shows", "Concerts"]}
                 loop={0}
                 cursor
                 cursorStyle="|"
@@ -43,7 +53,7 @@ export default function Home() {
         </div>
       </div>
       <Category />
-    <UpcomingSlider/>
+      <UpcomingSlider />
     </div>
   );
 }

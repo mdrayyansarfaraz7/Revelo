@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import jwt from 'jsonwebtoken';
 
-export default async function POST(req) {
-    const { email, password } = req.body;
-    if (email == process.env.REVELO_ADMIN_EMAIL && password == process.env.REVELO_ADMIN_SECRET) {
+export const POST = async (req) => {
+    const body = await req.json();
+    const { email, password } = body;
+
+    if (email === process.env.REVELO_ADMIN_EMAIL && password === process.env.REVELO_ADMIN_SECRET) {
         const token = jwt.sign(
             { role: 'admin' },
             process.env.ADMIN_JWT_SECRET,
@@ -14,4 +16,4 @@ export default async function POST(req) {
     }
 
     return NextResponse.json({ error: 'Invalid admin credentials' }, { status: 401 });
-}
+};
