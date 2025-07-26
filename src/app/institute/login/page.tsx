@@ -3,19 +3,53 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 export default function InstituteLoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
+    const [institute, setInstitute] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
+    interface InstituteTokenPayload {
+        id: string;
+        name: string;
+        role: string;
+        exp?: number;
+        iat?: number;
+    }
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
+
+        try {
+            const res = await axios.post('/api/institute-login', {
+                institute,
+                password,
+            });
+
+            const token = res.data.token;
+            localStorage.setItem('institute_token', token);
+
+            const decoded = jwtDecode<InstituteTokenPayload>(token);
+            const id = decoded.id;
+
+            router.push(`/institute/dashboard/${id}`);
+        } catch (err: any) {
+            const backendMsg = err.response?.data?.error;
+            setError(backendMsg || 'Something went wrong');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="min-h-screen flex bg-[#111111]  text-white">
+        <div className="min-h-screen flex bg-[#111111] text-white">
             {/* Left Side - Login */}
             <div className="w-full md:w-1/3 flex items-center justify-center px-6 md:px-12">
                 <div className="max-w-md w-full">
@@ -30,15 +64,23 @@ export default function InstituteLoginPage() {
                     <p className="mb-8 text-sm text-gray-400">
                         Manage your institute's presence, host events, and empower your students.
                     </p>
+
+                    {/* Error message */}
+                    {error && (
+                        <div className="mb-4 text-red-500 bg-red-800/20 px-3 py-2 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <form onSubmit={handleLogin} className="space-y-4">
                         <div>
-                            <label className="block mb-1 text-sm font-medium">Institute Email</label>
+                            <label className="block mb-1 text-sm font-medium">Institute Name</label>
                             <input
-                                type="email"
-                                className="w-full px-4 py-2 rounded-md bg-[#111111] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                placeholder="you@institute.edu"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                type="text"
+                                className="w-full px-4 py-2 rounded-md bg-[#111111] text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
+                                placeholder="Enter your institution's name"
+                                value={institute}
+                                onChange={(e) => setInstitute(e.target.value)}
                                 required
                             />
                         </div>
@@ -46,23 +88,27 @@ export default function InstituteLoginPage() {
                             <label className="block mb-1 text-sm font-medium">Password</label>
                             <input
                                 type="password"
-                                className="w-full px-4 py-2 rounded-md bg-[#111111]  text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                className="w-full px-4 py-2 rounded-md bg-[#111111]  text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-500"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
                         </div>
+
                         <button
                             type="submit"
-                            className="w-full py-2 bg-[#171735]   hover:bg-[#131321]  rounded-md text-white font-semibold transition duration-200"
+                            className="w-full py-2 bg-[#171735] hover:bg-[#131321] rounded-md text-white font-semibold transition duration-200 disabled:opacity-60"
+                            disabled={loading}
                         >
-                            Signin
+                            {loading ? 'Signing in...' : 'Signin'}
                         </button>
                     </form>
+
+
                     <p className="mt-6 text-sm text-gray-500">
                         Not registered yet?{' '}
-                        <a href="/institute/signup" className="text-purple-400 hover:underline">
+                        <a href="/institute/register" className="text-purple-400 hover:underline">
                             Register your Institution
                         </a>
                     </p>
