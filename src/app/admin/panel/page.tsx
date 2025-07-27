@@ -29,9 +29,13 @@ export default function AdminPanel() {
     }
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('revelo_admin_token');
-    router.push('/');
+  const handleLogout =async () => {
+    try {
+      await axios.get('/api/admin/logout', { withCredentials: true });
+       router.push('/');
+    } catch (error) {
+      console.error('Admin logout failed:', error);
+    }
   };
 
   const [verifiedInstitutes, setVerifiedInstitutes] = useState<Institute[]>([]);

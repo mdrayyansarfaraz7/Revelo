@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import Institute from '@/models/instituteModel';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { cookies } from "next/headers";
 
 export async function POST(req) {
   const body = await req.json(); 
@@ -39,5 +40,12 @@ export async function POST(req) {
     { expiresIn: '12d' }
   );
 
-  return NextResponse.json({ token }, { status: 200 });
+  cookies().set('institute_token', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  maxAge: 60 * 60 * 12 
+});
+
+return NextResponse.json({ success: true });
 }
