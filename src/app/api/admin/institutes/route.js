@@ -4,14 +4,6 @@ import { verifyAdmin } from '@/lib/adminAuth';
 import dbConnect from '@/lib/dbConnect';
 
 export async function GET(req) {
-  console.log("API HIT: /api/admin/institutes");
-
-  const isAdmin = verifyAdmin(req);
-  console.log("Admin verified:", isAdmin);
-
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
 
   try {
     await dbConnect();

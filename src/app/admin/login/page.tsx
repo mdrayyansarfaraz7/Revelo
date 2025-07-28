@@ -26,19 +26,23 @@ export default function Login() {
         e.preventDefault();
         setError('');
         setLoading(true);
-        try {
-            const res = await axios.post('/api/admin/login', formData);
-            const token = res.data.token;
 
-            localStorage.setItem('revelo_admin_token', token);
+        try {
+            await axios.post(
+                '/api/admin/login',
+                formData,
+                { withCredentials: true }
+            );
+
             router.push('/admin/panel');
 
         } catch (err: any) {
-            setError(err?.response?.data?.message || 'Login failed. Try again.');
+            setError(err?.response?.data?.error || 'Login failed. Try again.');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">

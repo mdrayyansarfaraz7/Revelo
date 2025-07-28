@@ -36,12 +36,8 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchInstitutes = async () => {
       try {
-        const token = localStorage.getItem('revelo_admin_token');
-        if (!token) return;
 
-        const res = await axios.get('/api/admin/institutes', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get('/api/admin/institutes',);
 
         setVerifiedInstitutes(res.data.institutesVerified || []);
         setNotVerifiedInstitutes(res.data.institutesNotVerified || []);
