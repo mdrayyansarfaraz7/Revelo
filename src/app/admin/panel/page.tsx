@@ -21,14 +21,6 @@ interface Institute {
 export default function AdminPanel() {
   const router = useRouter();
 
-  // Protect admin panel
-  useEffect(() => {
-    const token = localStorage.getItem('revelo_admin_token');
-    if (!token) {
-      router.push('/');
-    }
-  }, [router]);
-
   const handleLogout =async () => {
     try {
       await axios.get('/api/admin/logout', { withCredentials: true });

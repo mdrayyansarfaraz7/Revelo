@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic'; // Required for setting cookies
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Institute from '@/models/instituteModel';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { cookies } from "next/headers";
 
 export async function POST(req) {
   const body = await req.json(); 
@@ -30,6 +31,7 @@ export async function POST(req) {
   if (!instituteDoc.isVerified) {
     return NextResponse.json({ error: "Institute Not Verified By the Admin" }, { status: 403 });
   }
+
   const token = jwt.sign(
     {
       id: instituteDoc._id,
@@ -40,12 +42,14 @@ export async function POST(req) {
     { expiresIn: '12d' }
   );
 
-  cookies().set('institute_token', token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-  maxAge: 60 * 60 * 12 
-});
+  const response = NextResponse.json({ success: true,id: instituteDoc._id });
 
-return NextResponse.json({ success: true });
+  response.cookies.set('institute_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 12, 
+  });
+
+  return response;
 }

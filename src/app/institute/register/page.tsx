@@ -39,12 +39,6 @@ export default function InstituteRegisterPage() {
 
       const router = useRouter();
       
-      useEffect(() => {
-        const token = localStorage.getItem('revelo_admin_token');
-        if (token) {
-          router.push('/admin/panel');
-        }
-      }, []);
     
 
     useEffect(() => {

@@ -28,18 +28,24 @@ export default function InstituteLoginPage() {
         setLoading(true);
 
         try {
-            const res = await axios.post('/api/institute-login', {
-                institute,
-                password,
-            });
+            const res = await axios.post(
+                '/api/institute-login',
+                {
+                    institute,
+                    password,
+                },
+                {
+                    withCredentials: true, 
+                }
+            );
 
-            const token = res.data.token;
-            localStorage.setItem('institute_token', token);
+            const { id } = res.data;
+            if (id) {
+                router.push(`/institute/dashboard/${id}`);
+            } else {
+                setError("Login succeeded but no ID returned");
+            }
 
-            const decoded = jwtDecode<InstituteTokenPayload>(token);
-            const id = decoded.id;
-
-            router.push(`/institute/dashboard/${id}`);
         } catch (err: any) {
             const backendMsg = err.response?.data?.error;
             setError(backendMsg || 'Something went wrong');
@@ -47,6 +53,7 @@ export default function InstituteLoginPage() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex bg-[#111111] text-white">

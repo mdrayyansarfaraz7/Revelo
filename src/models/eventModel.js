@@ -1,60 +1,66 @@
 import mongoose from 'mongoose';
+const { Schema, model, models, Types } = mongoose;
 
-const EventSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
+const EventSchema = new Schema({
+  title: { type: String, required: true, trim: true },
+  description: { type: String, required: true },
+  
   instituteID: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'Institute',
     required: true
   },
-  admin: [{
-    adminRef: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      refPath: 'admin.role'
-    },
-    role: {
-      type: String,
-      enum: ['User', 'Institute'],
-      required: true
-    }
-  }],
+
   coordinators: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'User'
   }],
-  thumbnail: {
-    type: String,
-    trim: true
-  },
+
+  thumbnail: { type: String, trim: true, required: true },
+
   flyers: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'Flyer'
   }],
+
   videos: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'Video'
   }],
+
   categories: [{
     type: String,
-    enum: ['Cultural Fest', 'Tech Fest', 'Hackathon', 'Ideathon', 'Workshop', 'Sports']
+    enum: [
+      'Cultural Fest',
+      'Tech Fest',
+      'Hackathon',
+      'Ideathon',
+      'Workshop',
+      'Sports',
+      'Concerts',
+      'E-Submits',
+      'Carnival'
+    ]
   }],
+
   subEvents: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'SubEvent'
   }],
+
+  allowDirectRegistration: { type: Boolean, default: false },
+  registrationFee: { type: Number, default: 0 },
+  isPaid: { type: Boolean, default: false },
+
+  isTicketed: { type: Boolean, default: false },
+  ticketPrice: { type: Number, default: 0 },
+  ticketLimit: { type: Number },
+
   stats: {
     totalRegistrations: { type: Number, default: 0 },
     views: { type: Number, default: 0 }
   },
+
   location: {
     venue: { type: String, required: true },
     city: { type: String, required: true },
@@ -63,18 +69,15 @@ const EventSchema = new mongoose.Schema({
     pinCode: { type: String }
   },
 
-  startDate: {
-    type: Date,
-    required: true
-  },
-  endDate: {
-    type: Date,
-    required: true
-  }
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
 
-}, {
-  timestamps: true
-});
+  isPublished: { type: Boolean, default: false },
+  isPaymentDone: { type: Boolean, default: false },
 
-const Event = mongoose.models.Event || mongoose.model('Event', EventSchema);
+  paymentRef: { type: Types.ObjectId, ref: 'Payment' }
+
+}, { timestamps: true });
+
+const Event = models.Event || model('Event', EventSchema);
 export default Event;

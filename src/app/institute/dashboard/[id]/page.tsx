@@ -30,14 +30,6 @@ export default function InstituteDashboardPage() {
   const [institute, setInstitute] = useState<Institute | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Redirect if no token
-  useEffect(() => {
-    const token = localStorage.getItem('institute_token');
-    if (!token) {
-      router.push('/institute/login');
-    }
-  }, [router]);
-
   // Fetch institute data
   useEffect(() => {
     const fetchInstitute = async () => {
