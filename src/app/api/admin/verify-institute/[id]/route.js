@@ -6,11 +6,6 @@ import { verifyAdmin } from '@/lib/adminAuth';
 export async function PUT(req, context) {
   const { params } = context;
 
-  const isAdmin = await verifyAdmin(req); 
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
-
   await dbConnect();
 
   const { id } = params;

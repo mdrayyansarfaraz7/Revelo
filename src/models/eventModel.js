@@ -4,7 +4,7 @@ const { Schema, model, models, Types } = mongoose;
 const EventSchema = new Schema({
   title: { type: String, required: true, trim: true },
   description: { type: String, required: true },
-  
+
   instituteID: {
     type: Types.ObjectId,
     ref: 'Institute',
@@ -50,7 +50,6 @@ const EventSchema = new Schema({
 
   allowDirectRegistration: { type: Boolean, default: false },
   registrationFee: { type: Number, default: 0 },
-  isPaid: { type: Boolean, default: false },
 
   isTicketed: { type: Boolean, default: false },
   ticketPrice: { type: Number, default: 0 },
@@ -60,7 +59,6 @@ const EventSchema = new Schema({
     totalRegistrations: { type: Number, default: 0 },
     views: { type: Number, default: 0 }
   },
-
   location: {
     venue: { type: String, required: true },
     city: { type: String, required: true },
@@ -69,11 +67,19 @@ const EventSchema = new Schema({
     pinCode: { type: String }
   },
 
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
+  duration: {
+    type: [Date],
+    required: true,
+    validate: {
+      validator: function (val) {
+        return val.length === 2 && val[0] <= val[1];
+      },
+      message: "Please provide a valid start and end date",
+    },
+  },
 
   isPublished: { type: Boolean, default: false },
-  isPaymentDone: { type: Boolean, default: false },
+  isPlatformPaymentDone: { type: Boolean, default: false },
 
   paymentRef: { type: Types.ObjectId, ref: 'Payment' }
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface Institute {
   _id: string;
@@ -30,19 +31,29 @@ export default function InstituteDashboardPage() {
   const [institute, setInstitute] = useState<Institute | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch institute data
+
   useEffect(() => {
-    const fetchInstitute = async () => {
+    const fetchAndValidate = async () => {
       try {
-        const res = await axios.get(`/api/institute/${id}`);
-        setInstitute(res.data.institute);
-      } catch (err: any) {
+
+        const res = await axios.get('/api/institute/itsMe', { withCredentials: true });
+        const loggedInId = res.data.instituteId;
+
+        if (loggedInId !== id) {
+          router.push(`/institute/dashboard/${loggedInId}`);
+          return;
+        }
+
+
+        const data = await axios.get(`/api/institute/${id}`);
+        setInstitute(data.data.institute);
+      } catch (err) {
         console.error(err);
-        setError('Failed to fetch institute data.');
+        setError('Unauthorized or failed to fetch data');
       }
     };
 
-    if (id) fetchInstitute();
+    if (id) fetchAndValidate();
   }, [id]);
 
   const handleLogout = async () => {
@@ -65,23 +76,39 @@ export default function InstituteDashboardPage() {
   if (!institute) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
-        <ClipLoader size={80} color="#9333ea" />
+        <ClipLoader size={40} color="#9333ea" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#111111] text-white px-8 py-6 space-y-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <Image src="/logo.png" alt="logo" width={140} height={40} />
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm font-semibold"
-        >
-          Logout
-        </button>
-      </div>
+      <header className="bg-[#111111] text-white border-b border-white/10 px-6 py-4 flex items-center justify-between">
+        {/* Left: Logo + Nav */}
+        <div className="flex items-center gap-8">
+          <Image src="/logo.png" alt="Logo" width={130} height={40} />
+
+          {/* Navigation */}
+          <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+            <Link href="/institute/overview" className="hover:text-white transition">Overview</Link>
+            <Link href="/institute/insights" className="hover:text-white transition">Event Insights</Link>
+            <Link href="/institute/registrations" className="hover:text-white transition">Registrations</Link>
+            <Link href="/institute/engagement" className="hover:text-white transition">User Engagement</Link>
+            <Link href="/institute/performance" className="hover:text-white transition">Performance</Link>
+            <Link href="/institute/feedback" className="hover:text-white transition">Feedback</Link>
+          </nav>
+        </div>
+
+        {/* Right: Logout or Profile */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm font-semibold"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
 
       {/* Title */}
       <h2 className="text-4xl font-bold">Institution’s Dashboard</h2>

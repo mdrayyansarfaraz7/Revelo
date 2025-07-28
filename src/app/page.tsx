@@ -1,8 +1,8 @@
 'use client';
-import Category from "./components/Category";
-import Header from "./components/Header";
+import Category from "@/components/Category";
+import Header from "@/components/Header";
 import { Typewriter } from "react-simple-typewriter";
-import UpcomingSlider from "./components/UpcomingProgrammesSlider";
+import UpcomingSlider from "@/components/UpcomingProgrammesSlider";
 import { useEffect } from "react";
 import { useRouter } from 'next/navigation';
 

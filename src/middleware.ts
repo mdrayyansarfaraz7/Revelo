@@ -27,7 +27,7 @@ if (pathname.startsWith('/institute/dashboard') && !pathname.startsWith('/instit
 
 if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
   if (!adminToken || !(await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET!))) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 }
 
