@@ -33,6 +33,7 @@
     "next": "15.3.5",
     "next-auth": "^4.24.11",
     "next-connect": "^1.0.0",
+    "razorpay": "^2.9.6",
     "react": "^19.0.0",
     "react-day-picker": "^9.8.1",
     "react-dom": "^19.0.0",

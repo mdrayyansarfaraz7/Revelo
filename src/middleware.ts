@@ -19,7 +19,8 @@ export async function middleware(request: NextRequest) {
     request.cookies.get('next-auth.session-token')?.value ||
     request.cookies.get('__Secure-next-auth.session-token')?.value;
 
-if (pathname.startsWith('/institute/dashboard') && !pathname.startsWith('/institute/login')) {
+  if ((pathname.startsWith('/institute/dashboard') || pathname === '/institute/create-event') 
+      && !pathname.startsWith('/institute/login')) {
   if (!instituteToken || !(await verifyToken(instituteToken, process.env.JWT_SECRET!))) {
     return NextResponse.redirect(new URL('/institute/login', request.url));
   }
@@ -43,6 +44,7 @@ if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
 export const config = {
   matcher: [
     '/institute/dashboard/:path*',
+    '/event/create-event',
     '/admin/:path*',
     '/user/dashboard/:path*',
   ],

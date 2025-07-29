@@ -64,7 +64,7 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (err) {
-    console.error('🔴 Error registering institute:', err);
+    console.error('Error registering institute:', err);
     return new Response(JSON.stringify({ error: 'Server error' }), {
       status: 500,
     });
