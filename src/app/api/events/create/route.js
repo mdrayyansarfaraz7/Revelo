@@ -26,6 +26,8 @@ export async function POST(req) {
             pinCode,
             from,
             to,
+            registrationStarts,
+            registrationEnds,
             paymentData,
         } = body;
 
@@ -45,7 +47,9 @@ export async function POST(req) {
             !country ||
             !pinCode ||
             !from ||
-            !to
+            !to ||
+            !registrationStarts ||
+            !registrationEnds
         ) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
         }
@@ -91,6 +95,8 @@ export async function POST(req) {
                 pinCode,
             },
             duration: [new Date(from), new Date(to)],
+            registrationStarts: new Date(registrationStarts),
+            registrationEnds: new Date(registrationEnds),
             instituteID,
             isPlatformPaymentDone: true,
             paymentRef: newPayment._id,

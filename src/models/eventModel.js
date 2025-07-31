@@ -28,7 +28,7 @@ const EventSchema = new Schema({
     ref: 'Video'
   }],
 
-  categories: [{
+  category: {
     type: String,
     enum: [
       'Cultural Fest',
@@ -40,8 +40,9 @@ const EventSchema = new Schema({
       'Concerts',
       'E-Submits',
       'Carnival'
-    ]
-  }],
+    ],
+    required: true
+  },
 
   subEvents: [{
     type: Types.ObjectId,
@@ -76,6 +77,37 @@ const EventSchema = new Schema({
       },
       message: "Please provide a valid start and end date",
     },
+  },
+
+  registrationStarts: {
+    type: Date,
+    required: true,
+    validate: [
+      {
+        validator: function (val) {
+          return this.duration && val <= this.duration[0];
+        },
+        message: "Registration must start before or on the event start date"
+      }
+    ]
+  },
+  registrationEnds: {
+    type: Date,
+    required: true,
+    validate: [
+      {
+        validator: function (val) {
+          return this.registrationStarts && val >= this.registrationStarts;
+        },
+        message: "Registration end date must be after registration start date"
+      },
+      {
+        validator: function (val) {
+          return this.duration && val <= this.duration[0];
+        },
+        message: "Registration must end before or on the event start date"
+      }
+    ]
   },
 
   isPublished: { type: Boolean, default: false },

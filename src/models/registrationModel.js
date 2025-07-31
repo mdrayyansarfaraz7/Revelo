@@ -6,13 +6,6 @@ const RegistrationSchema = new mongoose.Schema({
     ref: 'SubEvent',
     required: true
   },
-
-  mode: {
-    type: String,
-    enum: ['online', 'offline'],
-    required: true
-  },
-
   participant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

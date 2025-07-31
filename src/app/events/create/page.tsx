@@ -48,6 +48,8 @@ function Page() {
   const [pinCode, setPinCode] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [registrationStarts, setRegistrationStarts] = useState("");
+  const [registrationEnds, setRegistrationEnds] = useState("");
 
   const [allowDirectRegistration, setAllowDirectRegistration] = useState(false);
   const [isTicketed, setIsTicketed] = useState(false);
@@ -57,53 +59,52 @@ function Page() {
 
 
   const handlePaymentAndSubmit = async () => {
-  const sdkLoaded = await loadRazorpayScript();
-  if (!sdkLoaded) {
-    toast.error("Failed to load Razorpay SDK");
-    return;
-  }
+    const sdkLoaded = await loadRazorpayScript();
+    if (!sdkLoaded) {
+      toast.error("Failed to load Razorpay SDK");
+      return;
+    }
 
-  const instituteRes = await axios.get("/api/institute/itsMe", {
-    withCredentials: true,
-  });
+    const instituteRes = await axios.get("/api/institute/itsMe", {
+      withCredentials: true,
+    });
 
-  const { name, email, instituteId } = instituteRes.data;
+    const { name, email, instituteId } = instituteRes.data;
 
-  const orderRes = await axios.post("/api/payment/create-order", {
-    amount: 9900,
-    purpose: "EventCreation",
-  });
+    const orderRes = await axios.post("/api/payment/create-order", {
+      amount: 9900,
+      purpose: "EventCreation",
+    });
 
-  const { order } = orderRes.data;
+    const { order } = orderRes.data;
 
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      amount: order.amount,
+      currency: "INR",
+      name: "Revelo",
+      description: "Platform Fee for Event Creation",
+      order_id: order.id,
+      handler: async function (response: any) {
+        await handleSubmitAfterPayment({
+          razorpayPaymentID: response.razorpay_payment_id,
+          razorpayOrderID: response.razorpay_order_id,
+          purpose: "EventCreation",
+          amount: 9900,
+        });
+      },
+      prefill: {
+        name: name || "Institute Admin",
+        email: email || "institute@example.com",
+      },
+      theme: {
+        color: "#6366f1",
+      },
+    };
 
-  const options = {
-    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-    amount: order.amount,
-    currency: "INR",
-    name: "Revelo",
-    description: "Platform Fee for Event Creation",
-    order_id: order.id,
-    handler: async function (response: any) {
-      await handleSubmitAfterPayment({
-        razorpayPaymentID: response.razorpay_payment_id,
-        razorpayOrderID: response.razorpay_order_id,
-        purpose: "EventCreation",
-        amount: 9900,
-      });
-    },
-    prefill: {
-      name: name || "Institute Admin",
-      email: email || "institute@example.com",
-    },
-    theme: {
-      color: "#6366f1",
-    },
+    const razor = new (window as any).Razorpay(options);
+    razor.open();
   };
-
-  const razor = new (window as any).Razorpay(options);
-  razor.open();
-};
 
 
   const handleSubmitAfterPayment = async (paymentData: any) => {
@@ -112,7 +113,7 @@ function Page() {
     }
     try {
       const response = await axios.get('/api/institute/itsMe', { withCredentials: true });
-      const loggedInId = response .data.instituteId;
+      const loggedInId = response.data.instituteId;
       const res = await axios.post("/api/events/create", {
         instituteID: loggedInId,
         title,
@@ -130,7 +131,9 @@ function Page() {
         pinCode,
         from: fromDate,
         to: toDate,
-        paymentData, 
+        registrationStarts,
+        registrationEnds,
+        paymentData,
       });
 
       toast.success("Event created successfully!");
@@ -269,7 +272,6 @@ function Page() {
             </div>
           </div>
 
-          {/* Registration Options */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label className="text-zinc-300">Allow Direct Registration</Label>
@@ -334,7 +336,6 @@ function Page() {
             </div>
           </div>
 
-          {/* Location */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <Input
               placeholder="Venue name"
@@ -368,27 +369,54 @@ function Page() {
             />
           </div>
 
-          {/* Date Range */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div>
+            <Label className="text-zinc-300 mb-2">Event starts</Label>
             <Input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
             />
+            </div>
+            <div>
+            <Label className="text-zinc-300 mb-2">Event ends</Label>
             <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
             />
+            </div>
+
           </div>
 
-          {/* Submit Button */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <Label className="text-zinc-300">Registration Starts</Label>
+              <Input
+                type="date"
+                value={registrationStarts}
+                onChange={(e) => setRegistrationStarts(e.target.value)}
+                className="bg-zinc-800 text-white border-zinc-700 mt-3"
+              />
+            </div>
+            <div>
+              <Label className="text-zinc-300">Registration Ends</Label>
+              <Input
+                type="date"
+                value={registrationEnds}
+                onChange={(e) => setRegistrationEnds(e.target.value)}
+                className="bg-zinc-800 text-white border-zinc-700 mt-3"
+              />
+            </div>
+          </div>
+
           <div className="pt-8 flex items-center justify-center">
             <Button
               type="button"
-             onClick={handlePaymentAndSubmit}
+              onClick={handlePaymentAndSubmit}
               className="bg-[#1111] hover:bg-[#1f1d1db5] border-1 border-gray-300 text-white px-8 py-3 rounded-md text-md font-medium transition w-2/4"
             >
               Submit Event
