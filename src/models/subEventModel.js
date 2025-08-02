@@ -6,7 +6,7 @@ const SubEventSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  date: {
+  scheduledAt: {
     type: Date,
     required: true
   },
@@ -48,8 +48,12 @@ const SubEventSchema = new mongoose.Schema({
     trim: true
   },
   rules: {
-    type: String,
-    required: true
+    type: [String],
+    required: true,
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.length > 0,
+      message: "At least one rule is required."
+    }
   },
   registrations: [{
     type: mongoose.Schema.Types.ObjectId,
