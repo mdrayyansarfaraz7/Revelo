@@ -123,7 +123,6 @@ export default function CreateSubEventPage() {
                     </p>
                 </div>
 
-                {/* Simple caution banner */}
                 <div className="flex items-start gap-3 bg-yellow-900/10 border-l-4 border-yellow-500 text-yellow-300 text-sm p-3 rounded-md mb-6">
                     <div className="flex-1">
                         <strong className="block">Note:</strong>
@@ -188,7 +187,6 @@ export default function CreateSubEventPage() {
                         </div>
                     </div>
 
-                    {/* Team settings */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <Label className="mb-1">Team Required</Label>
@@ -239,7 +237,6 @@ export default function CreateSubEventPage() {
                         />
                     </div>
 
-                    {/* Banner (full width) */}
                     <div>
                         <Label className="mb-1">Banner</Label>
                         <div className="flex flex-col sm:flex-row gap-4">

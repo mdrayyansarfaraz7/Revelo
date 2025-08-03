@@ -31,7 +31,7 @@ const flyerSchema = new mongoose.Schema({
 
     displayType: {
         type: String,
-        enum: ["scroll", "advertisement", "banner", "thumbnail"],
+        enum: ["scroll", "advertisement"],
          default: "scroll",
     },
 

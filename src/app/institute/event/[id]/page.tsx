@@ -40,6 +40,7 @@ interface EventData {
         views: number;
     };
     subEvents: any[];
+    flyers: any[]
 }
 
 
@@ -60,6 +61,8 @@ export default function EventDetailPage() {
         };
         fetchEvent();
     }, [id]);
+
+    console.log(event);
 
     if (!event) {
         return (
@@ -84,14 +87,14 @@ export default function EventDetailPage() {
         ticketPrice,
         registrationFee,
         stats,
-        subEvents
+        subEvents,
+        flyers
     } = event;
 
     return (
         <>
             <div className="bg-[#11111] text-white p-6 md:p-10 rounded-3xl shadow-2xl border border-zinc-800">
                 <div className="flex flex-col lg:flex-row gap-10">
-                    {/* Left */}
                     <div className="flex-1 space-y-6">
                         <div className="flex flex-wrap items-center gap-3">
                             <h1 className="text-6xl font-semibold tracking-tight">{title}</h1>
@@ -114,9 +117,6 @@ export default function EventDetailPage() {
                             </button>
                         )}
 
-
-
-                        {/* Location */}
                         <div className="flex items-start gap-3 pt-6">
                             <MapPin className="mt-1 text-gray-300" />
                             <div>
@@ -130,7 +130,7 @@ export default function EventDetailPage() {
                             </div>
                         </div>
 
-                        {/* Duration */}
+
                         <div className="flex items-start gap-3">
                             <CalendarDays className="mt-1 text-gray-300" />
                             <div>
@@ -143,7 +143,6 @@ export default function EventDetailPage() {
                         </div>
                     </div>
 
-                    {/* Right Image */}
                     <div className="lg:w-[55%] w-full aspect-video relative rounded-xl overflow-hidden border border-zinc-700 shadow">
                         <Image src={thumbnail} alt={title} fill className="object-cover" />
                     </div>
@@ -164,8 +163,6 @@ export default function EventDetailPage() {
                         dimmed={!isPublished}
                     />
 
-
-                    {/* Ticket or Registration Fee */}
                     {isTicketed && (
                         <StatCard
                             icon={<Ticket className="text-white w-5 h-5" />}
@@ -181,7 +178,6 @@ export default function EventDetailPage() {
                         />
                     )}
 
-                    {/* Sub-events only if not direct registration */}
                     {!allowDirectRegistration && (
                         <StatCard
                             icon={<LayoutList className="text-white w-5 h-5" />}
@@ -203,7 +199,7 @@ export default function EventDetailPage() {
                     </Button>
                 </div>
                 {subEvents.length > 0 ? (
-                    <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         {subEvents.map((subEvent: any) => (
                             <div
                                 key={subEvent._id}
@@ -237,7 +233,44 @@ export default function EventDetailPage() {
                     </div>
                 )}
             </div>
-
+            <div className='bg-[#111111d2] px-5 py-10 mt-8'>
+                <div className="flex items-center justify-between mb-6 px-6">
+                    <h2 className="text-2xl font-semibold text-white">Flyer</h2>
+                    <Button
+                        onClick={() => router.push(`/institute/event/create-flyer/${event!._id}`)}
+                        className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Flyer
+                    </Button>
+                </div>
+                {flyers.length > 0 ? (
+                    <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                        {subEvents.map((flyer: any) => (
+                            <div
+                                key={flyer._id}
+                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full max-w-xs mx-auto mb-6"
+                            >
+                                <div className="relative w-full aspect-[3/4] bg-black">
+                                    <Image
+                                        src={flyer.ImgUrl}
+                                        alt="flyer"
+                                        fill
+                                        className="object-contain"
+                                        sizes="(max-width: 768px) 100vw, 300px"
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className='flex items-center justify-center h-32 mx-2  mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md'>
+                        <p className="text-gray-400 text-center mb-3">
+                            Looks like you haven’t added any flyers. Create one to get your event noticed.
+                        </p>
+                    </div>
+                )}
+            </div>
         </>
 
 
