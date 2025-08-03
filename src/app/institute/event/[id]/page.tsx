@@ -245,31 +245,98 @@ export default function EventDetailPage() {
                     </Button>
                 </div>
                 {flyers.length > 0 ? (
-                    <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                        {subEvents.map((flyer: any) => (
-                            <div
-                                key={flyer._id}
-                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full max-w-xs mx-auto mb-6"
-                            >
-                                <div className="relative w-full aspect-[3/4] bg-black">
-                                    <Image
-                                        src={flyer.ImgUrl}
-                                        alt="flyer"
-                                        fill
-                                        className="object-contain"
-                                        sizes="(max-width: 768px) 100vw, 300px"
-                                    />
+                    <div className="px-6 space-y-10">
+                        {/* Portraits Section */}
+                        {flyers.some((f: any) => f.orientation === "portrait") && (
+                            <div>
+                                <h2 className="text-xl font-semibold text-white mb-4">Portrait</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {flyers
+                                        .filter((f: any) => f.orientation === "portrait")
+                                        .map((flyer: any) => (
+                                            <div
+                                                key={flyer._id}
+                                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full mx-auto"
+                                            >
+                                                {/* Image wrapper: no forced aspect ratio */}
+                                                <div className="w-full bg-black">
+                                                    {flyer.width && flyer.height ? (
+                                                        <Image
+                                                            src={flyer.imgUrl}
+                                                            alt="flyer"
+                                                            width={flyer.width}
+                                                            height={flyer.height}
+                                                            className="w-full h-full object-contain"
+                                                            sizes="100vw"
+                                                        />
+                                                    ) : (
+                                                        // fallback if dimensions missing
+                                                        <div className="relative w-full aspect-[3/4] bg-black">
+                                                            <Image
+                                                                src={flyer.imgUrl}
+                                                                alt="flyer"
+                                                                fill
+                                                                className="object-contain"
+                                                                sizes="100vw"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
-                        ))}
+                        )}
+
+                        {/* Landscapes Section */}
+                        {flyers.some((f: any) => f.orientation === "landscape") && (
+                            <div>
+                                <h2 className="text-xl font-semibold text-white mb-4">Advertisement</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {flyers
+                                        .filter((f: any) => f.orientation === "landscape")
+                                        .map((flyer: any) => (
+                                            <div
+                                                key={flyer._id}
+                                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full mx-auto"
+                                            >
+                                                <div className="w-full bg-black">
+                                                    {flyer.width && flyer.height ? (
+                                                        <Image
+                                                            src={flyer.imgUrl}
+                                                            alt="flyer"
+                                                            width={flyer.width}
+                                                            height={flyer.height}
+                                                            className="w-full h-full object-contain"
+                                                            sizes="100vw"
+                                                        />
+                                                    ) : (
+                                                        <div className="relative w-full aspect-[4/3] bg-black">
+                                                            <Image
+                                                                src={flyer.imgUrl}
+                                                                alt="flyer"
+                                                                fill
+                                                                className="object-contain"
+                                                                sizes="100vw"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
-                    <div className='flex items-center justify-center h-32 mx-2  mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md'>
+                    <div className="flex items-center justify-center h-32 mx-2 mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md">
                         <p className="text-gray-400 text-center mb-3">
-                            Looks like you haven’t added any flyers. Create one to get your event noticed.
+                            Looks like you haven’t added any flyers. Create one to get your event
+                            noticed.
                         </p>
                     </div>
                 )}
+
             </div>
         </>
 

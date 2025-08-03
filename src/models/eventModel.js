@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 const { Schema, model, models, Types } = mongoose;
+mongoose.set('autoIndex', false);
 
 const EventSchema = new Schema({
   title: { type: String, required: true, trim: true },
