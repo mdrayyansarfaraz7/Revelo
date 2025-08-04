@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { format } from 'date-fns';
 import { ClipLoader } from 'react-spinners';
 import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
+import Link from 'next/link';
 
 interface EventData {
     _id: string;
@@ -40,7 +41,8 @@ interface EventData {
         views: number;
     };
     subEvents: any[];
-    flyers: any[]
+    flyers: any[];
+    videos: any[]
 }
 
 
@@ -88,7 +90,8 @@ export default function EventDetailPage() {
         registrationFee,
         stats,
         subEvents,
-        flyers
+        flyers,
+        videos
     } = event;
 
     return (
@@ -236,20 +239,22 @@ export default function EventDetailPage() {
             <div className='bg-[#111111d2] px-5 py-10 mt-8'>
                 <div className="flex items-center justify-between mb-6 px-6">
                     <h2 className="text-2xl font-semibold text-white">Flyer</h2>
-                    <Button
-                        onClick={() => router.push(`/institute/event/create-flyer/${event!._id}`)}
-                        className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Flyer
-                    </Button>
+                    <Link href={`/institute/event/create-flyer/${event!._id}`}>
+                        <Button
+
+                            className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Flyer
+                        </Button>
+                    </Link>
                 </div>
                 {flyers.length > 0 ? (
                     <div className="px-6 space-y-10">
                         {/* Portraits Section */}
                         {flyers.some((f: any) => f.orientation === "portrait") && (
                             <div>
-                                <h2 className="text-xl font-semibold text-white mb-4">Portrait</h2>
+                                <h2 className="text-xl font-semibold text-white mb-4">Scrolling Flyers</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                                     {flyers
                                         .filter((f: any) => f.orientation === "portrait")
@@ -332,6 +337,91 @@ export default function EventDetailPage() {
                     <div className="flex items-center justify-center h-32 mx-2 mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md">
                         <p className="text-gray-400 text-center mb-3">
                             Looks like you haven’t added any flyers. Create one to get your event
+                            noticed.
+                        </p>
+                    </div>
+                )}
+
+            </div>
+            <div className='bg-[#111111d2] px-5 py-10 mt-8'>
+                <div className="flex items-center justify-between mb-6 px-6">
+                    <h2 className="text-2xl font-semibold text-white">Videos</h2>
+                    <Link href={`/institute/event/create-video/${event!._id}`}>
+                        <Button
+
+                            className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Video
+                        </Button>
+                    </Link>
+
+                </div>
+                {videos.length > 0 ? (
+                    <div className="px-6 space-y-10">
+                        {/* Portraits Section */}
+                        {videos.some((f: any) => f.videoType === "reel") && (
+                            <div>
+                                <h2 className="text-xl font-semibold text-white mb-4">Reels</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {videos
+                                        .filter((f: any) => f.videoType === "reel")
+                                        .map((video: any) => (
+                                            <div
+                                                key={video._id}
+                                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full mx-auto"
+                                            >
+
+                                                <div className="w-full bg-black">
+                                                    <div className="relative w-full aspect-[3/4] bg-black">
+                                                        <video
+                                                            poster={video.thumbnailUrl}
+                                                            className="absolute top-0 left-0 w-full h-full object-cover"
+                                                            muted
+                                                            playsInline
+                                                            src={video.videoUrl}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Landscapes Section */}
+                        {videos.some((f: any) => f.videoType === "longVideo") && (
+                            <div>
+                                <h2 className="text-xl font-semibold text-white mb-4">Highlights</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {videos
+                                        .filter((f: any) => f.videoType === "longVideo")
+                                        .map((video: any) => (
+                                            <div
+                                                key={video._id}
+                                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full mx-auto"
+                                            >
+                                                <div className="w-full bg-black">
+                                                    <div className="relative w-full aspect-[3/4] bg-black">
+                                                        <video
+                                                            poster={video.thumbnailUrl}
+                                                            className="absolute top-0 left-0 w-full h-full object-cover"
+                                                            muted
+                                                            playsInline
+                                                            src={video.videoUrl}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-32 mx-2 mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md">
+                        <p className="text-gray-400 text-center mb-3">
+                            Looks like you haven’t added any videos/reel. Create one to get your event
                             noticed.
                         </p>
                     </div>
