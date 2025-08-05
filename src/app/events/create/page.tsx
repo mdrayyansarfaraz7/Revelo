@@ -197,16 +197,16 @@ function Page() {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 text-white border-zinc-700">
-                  <SelectItem value="cultural-fest">Cultural Fest</SelectItem>
-                  <SelectItem value="tech-fest">Tech Fest</SelectItem>
-                  <SelectItem value="hackathon">Hackathon</SelectItem>
-                  <SelectItem value="ideathon">Ideathon</SelectItem>
-                  <SelectItem value="workshop">Workshop</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                  <SelectItem value="concerts">Concerts</SelectItem>
-                  <SelectItem value="e-summits">E-Summits</SelectItem>
-                  <SelectItem value="contest">Contest</SelectItem>
-                  <SelectItem value="carnival">Carnival</SelectItem>
+                  <SelectItem value="Cultural Fest">Cultural Fest</SelectItem>
+                  <SelectItem value="Tech Fest">Tech Fest</SelectItem>
+                  <SelectItem value="Hackathon">Hackathon</SelectItem>
+                  <SelectItem value="Ideathon">Ideathon</SelectItem>
+                  <SelectItem value="Workshop">Workshop</SelectItem>
+                  <SelectItem value="Workshop">Sports</SelectItem>
+                  <SelectItem value="Concerts">Concerts</SelectItem>
+                  <SelectItem value="E-Summits">E-Summits</SelectItem>
+                  <SelectItem value="Contest">Contest</SelectItem>
+                  <SelectItem value="Carnival">Carnival</SelectItem>
                 </SelectContent>
               </Select>
             </div>

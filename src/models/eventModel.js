@@ -40,7 +40,8 @@ const EventSchema = new Schema({
       'Sports',
       'Concerts',
       'E-Submits',
-      'Carnival'
+      'Carnival',
+      'Contest'
     ],
     required: true
   },

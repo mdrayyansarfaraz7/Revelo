@@ -206,7 +206,7 @@ export default function EventDetailPage() {
                         {subEvents.map((subEvent: any) => (
                             <div
                                 key={subEvent._id}
-                                onClick={() => router.push(`/institute/sub-event/${subEvent._id}`)}
+                                onClick={() => router.push(`/institute/sub-event/${id}/${subEvent._id}`)}
                                 className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full max-w-xs mx-auto mb-6"
                             >
                                 {/* Image Container */}
@@ -377,9 +377,11 @@ export default function EventDetailPage() {
                                                         <video
                                                             poster={video.thumbnailUrl}
                                                             className="absolute top-0 left-0 w-full h-full object-cover"
-                                                            muted
-                                                            playsInline
+                                                           
                                                             src={video.videoUrl}
+                                                            controls
+                                                            playsInline
+                                                            preload="metadata"
                                                         />
                                                     </div>
                                                 </div>
@@ -407,7 +409,6 @@ export default function EventDetailPage() {
                                                             poster={video.thumbnailUrl}
                                                             className="absolute top-0 left-0 w-full h-full object-cover"
                                                             muted
-                                                            playsInline
                                                             src={video.videoUrl}
                                                         />
                                                     </div>
