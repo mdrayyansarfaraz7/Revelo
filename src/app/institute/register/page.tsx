@@ -34,7 +34,7 @@ export default function InstituteRegisterPage() {
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
     const [loading, setLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
+    
 
       const router = useRouter();
       
@@ -50,7 +50,7 @@ export default function InstituteRegisterPage() {
 
     const handleSubmit = async () => {
         setLoading(true);
-        setSuccessMessage("");
+        
 
         try {
             let logoUrl = "";
@@ -76,7 +76,8 @@ export default function InstituteRegisterPage() {
 
             await axios.post("/api/register-institute", payload);
 
-            setSuccessMessage("Your account will be activated within 24 hours. You may log in afterwards.");
+            toast.success("Your account will be activated within 24 hours. You may log in afterwards.");
+            router.push('/');
         } catch (error: any) {
             toast.error(error?.response?.data?.error || "Registration failed. Please try again.");
         } finally {
@@ -227,11 +228,6 @@ export default function InstituteRegisterPage() {
                             </div>
                         </div>
 
-
-
-                        {successMessage && (
-                            <div className="text-green-400 text-sm pt-4">{successMessage}</div>
-                        )}
                     </CardContent>
 
                     <CardFooter className="flex justify-end gap-4 px-8 pb-8">

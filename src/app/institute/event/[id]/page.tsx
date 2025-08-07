@@ -37,7 +37,7 @@ interface EventData {
         pinCode?: string;
     };
     duration: string[];
-    isPublished: boolean;
+   
     isTicketed: boolean;
     allowDirectRegistration: boolean;
     teamRequired?: boolean;
@@ -96,7 +96,6 @@ export default function EventDetailPage() {
         thumbnail,
         location,
         duration,
-        isPublished,
         isTicketed,
         allowDirectRegistration,
         teamRequired,
@@ -127,15 +126,6 @@ export default function EventDetailPage() {
 
                         <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
 
-                        {!isPublished && (
-                            <button className="bg-zinc-900 border border-purple-300 text-sm font-semibold text-purple-400 px-5 py-2 rounded-md animate-pulse hover:animate-none transition-transform duration-300 hover:scale-105 flex items-center justify-center gap-2">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
-                                </span>
-                                Launch Your Event
-                            </button>
-                        )}
 
                         <div className="flex items-start gap-3 pt-6">
                             <MapPin className="mt-1 text-gray-300" />
@@ -179,14 +169,14 @@ export default function EventDetailPage() {
                         icon={<Users className="text-white w-5 h-5" />}
                         label="Registrations"
                         value={`${stats?.totalRegistrations || 0}`}
-                        dimmed={!isPublished}
+                        
                     />
 
                     <StatCard
                         icon={<Eye className="text-white w-5 h-5" />}
                         label="Views"
                         value={`${stats?.views || 0}`}
-                        dimmed={!isPublished}
+                        
                     />
 
                     {isTicketed && (

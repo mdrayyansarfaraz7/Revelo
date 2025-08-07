@@ -31,7 +31,7 @@ interface Event {
   title: string;
   thumbnail: string;
   duration: [string, string];
-  isPublished: boolean;
+  
 }
 function formatDateWithSuffix(dateStr: string) {
   return format(new Date(dateStr), "do MMMM, yyyy");
@@ -124,21 +124,16 @@ export default function InstituteDashboardPage() {
 
         setUpcomingEvents(
           fetchedEvents.filter((event: Event) =>
-            new Date(event.duration[0]) > now &&
-            event.isPublished
+            new Date(event.duration[0]) > now 
           )
         );
 
         setPastEvents(
           fetchedEvents.filter((event: Event) =>
-            new Date(event.duration[1]) < now &&
-            event.isPublished
+            new Date(event.duration[1]) < now 
           )
         );
 
-        setUnpublishedEvents(
-          fetchedEvents.filter((event: Event) => !event.isPublished)
-        );
       } catch (err) {
         console.error(err);
         setError('Unauthorized or failed to fetch data');
@@ -240,8 +235,6 @@ export default function InstituteDashboardPage() {
       </div>
 
       <EventSection title="Upcoming Events" events={upcomingEvents} />
-      
-      <EventSection title="Unpublished Events" events={unpublishedEvents} />
 
       <EventSection title="Past Events" events={pastEvents} />
     </div>

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 const { Schema, model, models, Types } = mongoose;
+
 mongoose.set('autoIndex', false);
 
 const EventSchema = new Schema({
@@ -52,7 +53,7 @@ const EventSchema = new Schema({
   }],
 
   allowDirectRegistration: { type: Boolean, default: false },
-  registrationFee: { type: Number, default: 0 },
+  registrationFee: { type: Number, default: 0 }, // Optional, validated in route logic
 
   isTicketed: { type: Boolean, default: false },
   ticketPrice: { type: Number, default: 0 },
@@ -113,9 +114,7 @@ const EventSchema = new Schema({
     ]
   },
 
-  isPublished: { type: Boolean, default: false },
   isPlatformPaymentDone: { type: Boolean, default: false },
-
   paymentRef: { type: Types.ObjectId, ref: 'Payment' },
 
   teamRequired: {
@@ -124,23 +123,13 @@ const EventSchema = new Schema({
   },
 
   teamSize: {
-    min: {
-      type: Number,
-      default: 1
-    },
-    max: {
-      type: Number,
-      default: 1
-    }
+    min: { type: Number, default: 1 },
+    max: { type: Number, default: 1 }
   },
-  
+
   rules: {
-    type: [String],
-    required: true,
-    validate: {
-      validator: (arr) => Array.isArray(arr) && arr.length > 0,
-      message: "At least one rule is required."
-    }
+    type: [String], 
+    default: []
   },
 
   registrations: [{
