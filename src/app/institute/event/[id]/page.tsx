@@ -16,6 +16,12 @@ import { ClipLoader } from 'react-spinners';
 import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import Link from 'next/link';
 
+interface Registration {
+  name?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
+
 interface EventData {
     _id: string;
     title: string;
@@ -34,15 +40,22 @@ interface EventData {
     isPublished: boolean;
     isTicketed: boolean;
     allowDirectRegistration: boolean;
+    teamRequired?: boolean;
+    teamSize?: {
+        min: number;
+        max: number;
+    };
+    rules?: string[];
     ticketPrice: number;
-    registrationFee: number;
+    registrations: Registration[];
+    registrationFee:number;
     stats: {
         totalRegistrations: number;
         views: number;
     };
     subEvents: any[];
     flyers: any[];
-    videos: any[]
+    videos: any[];
 }
 
 
@@ -86,7 +99,11 @@ export default function EventDetailPage() {
         isPublished,
         isTicketed,
         allowDirectRegistration,
+        teamRequired,
+        teamSize,
+        rules,
         ticketPrice,
+        registrations,
         registrationFee,
         stats,
         subEvents,
@@ -138,10 +155,16 @@ export default function EventDetailPage() {
                             <CalendarDays className="mt-1 text-gray-300" />
                             <div>
                                 <h2 className="font-medium text-white text-sm">Duration</h2>
-                                <p className="text-gray-200 text-sm">
-                                    {format(new Date(duration[0]), 'dd MMM yyyy')} —{' '}
-                                    {format(new Date(duration[1]), 'dd MMM yyyy')}
-                                </p>
+                                {
+                                    duration[0] === duration[1] ? (
+                                        <>
+                                            On {format(new Date(duration[0]), 'dd MMM yyyy')}
+                                        </>) : (<p className="text-gray-200 text-sm">
+                                            {format(new Date(duration[0]), 'dd MMM yyyy')} —{' '}
+                                            {format(new Date(duration[1]), 'dd MMM yyyy')}
+                                        </p>)
+                                }
+
                             </div>
                         </div>
                     </div>
@@ -190,52 +213,109 @@ export default function EventDetailPage() {
                     )}
                 </div>
             </div>
-            <div className="mt-10">
-                <div className="flex items-center justify-between mb-6 px-6">
-                    <h2 className="text-2xl font-semibold text-white">Sub-Events</h2>
-                    <Button
-                        onClick={() => router.push(`/institute/event/create-sub-event/${event!._id}`)}
-                        className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Sub-Event
-                    </Button>
-                </div>
-                {subEvents.length > 0 ? (
-                    <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                        {subEvents.map((subEvent: any) => (
-                            <div
-                                key={subEvent._id}
-                                onClick={() => router.push(`/institute/sub-event/${id}/${subEvent._id}`)}
-                                className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full max-w-xs mx-auto mb-6"
-                            >
-                                {/* Image Container */}
-                                <div className="relative w-full aspect-[3/4] bg-black">
-                                    <Image
-                                        src={subEvent.banner || "/placeholder.jpg"}
-                                        alt={subEvent.title}
-                                        fill
-                                        className="object-contain"
-                                        sizes="(max-width: 768px) 100vw, 300px"
-                                    />
-                                </div>
 
-                                {/* Title */}
-                                <div className="p-4">
-                                    <h3 className="text-white font-medium text-base text-center">
-                                        {subEvent.title}
-                                    </h3>
-                                </div>
+            {
+                allowDirectRegistration ? (
+                    <div className='mx-8'>
+<div className="mt-6 text-sm text-gray-300">
+  <h2 className="font-semibold text-base mb-1">Participation</h2>
+  <p className="text-gray-400">
+    {teamRequired ? (
+      <>
+        Team Size: <span className="font-medium text-white">{teamSize?.min || 1} - {teamSize?.max || 1}</span>
+      </>
+    ) : (
+      <>
+        Event Type: <span className="font-medium text-white">Solo Event</span>
+      </>
+    )}
+  </p>
+</div>
+
+{/* Rules Section */}
+{rules && (
+  <div className="mt-8">
+    <h2 className="text-xl font-semibold text-white mb-2">Rules & Guidelines</h2>
+    <ul className="list-disc list-inside space-y-2 text-gray-400 pl-2">
+      {rules.length > 0 ? (
+        rules.map((rule, index) => (
+          <li key={index} className="leading-relaxed">{rule}</li>
+        ))
+      ) : (
+        <li className="text-gray-500">No specific rules provided.</li>
+      )}
+    </ul>
+  </div>
+)}
+
+{/* Registrations Section */}
+<div className="mt-12">
+  <h2 className="text-2xl font-bold text-white mb-4">Registrations</h2>
+  <div className="border border-zinc-700 rounded-xl bg-[#1a1a1a] p-6 text-gray-300">
+    {registrations && registrations.length > 0 ? (
+      <ul className="space-y-2 text-left text-sm">
+        {registrations.map((reg, index) => (
+          <li key={index} className="text-zinc-300">
+            • {reg.name || `Team ${index + 1}`}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-gray-500 italic">No registrations yet.</p>
+    )}
+  </div>
+</div>
+                    </div>) : (
+                    <>
+                        <div className="mt-10">
+                            <div className="flex items-center justify-between mb-6 px-6">
+                                <h2 className="text-2xl font-semibold text-white">Sub-Events</h2>
+                                <Button
+                                    onClick={() => router.push(`/institute/event/create-sub-event/${event!._id}`)}
+                                    className="flex items-center gap-2 bg-[#272836] hover:bg-[#31334a] transition px-4 py-2 text-sm"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Sub-Event
+                                </Button>
                             </div>
+                            {subEvents.length > 0 ? (
+                                <div className="px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {subEvents.map((subEvent: any) => (
+                                        <div
+                                            key={subEvent._id}
+                                            onClick={() => router.push(`/institute/sub-event/${id}/${subEvent._id}`)}
+                                            className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full max-w-xs mx-auto mb-6"
+                                        >
+                                            {/* Image Container */}
+                                            <div className="relative w-full aspect-[3/4] bg-black">
+                                                <Image
+                                                    src={subEvent.banner || "/placeholder.jpg"}
+                                                    alt={subEvent.title}
+                                                    fill
+                                                    className="object-contain"
+                                                    sizes="(max-width: 768px) 100vw, 300px"
+                                                />
+                                            </div>
 
-                        ))}
-                    </div>
-                ) : (
-                    <div className='flex items-center justify-center h-32 mx-2  mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md'>
-                        <p className="text-gray-400">No sub-events available.</p>
-                    </div>
-                )}
-            </div>
+                                            {/* Title */}
+                                            <div className="p-4">
+                                                <h3 className="text-white font-medium text-base text-center">
+                                                    {subEvent.title}
+                                                </h3>
+                                            </div>
+                                        </div>
+
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className='flex items-center justify-center h-32 mx-2  mb-6 bg-[#111111] rounded-lg border border-zinc-700 shadow-md'>
+                                    <p className="text-gray-400">No sub-events available.</p>
+                                </div>
+                            )}
+                        </div></>)
+            }
+
+
             <div className='bg-[#111111d2] px-5 py-10 mt-8'>
                 <div className="flex items-center justify-between mb-6 px-6">
                     <h2 className="text-2xl font-semibold text-white">Flyer</h2>
@@ -377,7 +457,7 @@ export default function EventDetailPage() {
                                                         <video
                                                             poster={video.thumbnailUrl}
                                                             className="absolute top-0 left-0 w-full h-full object-cover"
-                                                           
+
                                                             src={video.videoUrl}
                                                             controls
                                                             playsInline

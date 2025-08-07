@@ -62,6 +62,7 @@ const EventSchema = new Schema({
     totalRegistrations: { type: Number, default: 0 },
     views: { type: Number, default: 0 }
   },
+
   location: {
     venue: { type: String, required: true },
     city: { type: String, required: true },
@@ -115,7 +116,37 @@ const EventSchema = new Schema({
   isPublished: { type: Boolean, default: false },
   isPlatformPaymentDone: { type: Boolean, default: false },
 
-  paymentRef: { type: Types.ObjectId, ref: 'Payment' }
+  paymentRef: { type: Types.ObjectId, ref: 'Payment' },
+
+  teamRequired: {
+    type: Boolean,
+    default: false
+  },
+
+  teamSize: {
+    min: {
+      type: Number,
+      default: 1
+    },
+    max: {
+      type: Number,
+      default: 1
+    }
+  },
+  
+  rules: {
+    type: [String],
+    required: true,
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.length > 0,
+      message: "At least one rule is required."
+    }
+  },
+
+  registrations: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Registration'
+  }]
 
 }, { timestamps: true });
 

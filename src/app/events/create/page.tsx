@@ -50,6 +50,10 @@ function Page() {
   const [toDate, setToDate] = useState("");
   const [registrationStarts, setRegistrationStarts] = useState("");
   const [registrationEnds, setRegistrationEnds] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+
 
   const [allowDirectRegistration, setAllowDirectRegistration] = useState(false);
   const [isTicketed, setIsTicketed] = useState(false);
@@ -57,64 +61,190 @@ function Page() {
   const [ticketPrice, setTicketPrice] = useState("");
   let imgURL = "";
 
+  const [teamRequired, setTeamRequired] = useState(false);
+  const [teamMin, setTeamMin] = useState(1);
+  const [teamMax, setTeamMax] = useState(1);
+  const [rules, setRules] = useState<string[]>([""]);
 
-  const handlePaymentAndSubmit = async () => {
-    const sdkLoaded = await loadRazorpayScript();
-    if (!sdkLoaded) {
-      toast.error("Failed to load Razorpay SDK");
-      return;
+  const addRule = () => setRules((r) => [...r, ""]);
+  const updateRule = (idx: number, val: string) => {
+    setRules((r) => {
+      const copy = [...r];
+      copy[idx] = val;
+      return copy;
+    });
+  };
+  const removeRule = (idx: number) => {
+    setRules((r) => r.filter((_, i) => i !== idx));
+  };
+
+  const validateForm = () => {
+    console.log("Running form validation");
+
+    // 1. Required fields
+    if (
+      !title || !category || !description || !file || !venue || !city ||
+      !state || !country || !fromDate || !toDate ||
+      !registrationStarts || !registrationEnds
+    ) {
+      toast.error("Please fill all required fields and upload a flyer.");
+      return false;
     }
 
-    const instituteRes = await axios.get("/api/institute/itsMe", {
-      withCredentials: true,
-    });
+    // 2. Fee logic
+    const fee = parseFloat(registrationFee);
+    const ticket = parseFloat(ticketPrice);
 
-    const { name, email, instituteId } = instituteRes.data;
+    if (allowDirectRegistration && (isNaN(fee) || fee < 0)) {
+      toast.error("Registration fee must be a non-negative number.");
+      return false;
+    }
 
-    const orderRes = await axios.post("/api/payment/create-order", {
-      amount: 9900,
-      purpose: "EventCreation",
-    });
+    if (isTicketed && (isNaN(ticket) || ticket < 0)) {
+      toast.error("Ticket price must be a non-negative number.");
+      return false;
+    }
+    if (allowDirectRegistration) {
+      if (!rules || rules.length === 0 || rules.some(r => r.trim() === "")) {
+        toast.error("Please provide at least one valid rule for direct registration.");
+        return false;
+      }
 
-    const { order } = orderRes.data;
+      if (teamRequired) {
+        if (teamMin < 1) {
+          toast.error("Minimum team size must be at least 1.");
+          return false;
+        }
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-      amount: order.amount,
-      currency: "INR",
-      name: "Revelo",
-      description: "Platform Fee for Event Creation",
-      order_id: order.id,
-      handler: async function (response: any) {
-        await handleSubmitAfterPayment({
-          razorpayPaymentID: response.razorpay_payment_id,
-          razorpayOrderID: response.razorpay_order_id,
-          purpose: "EventCreation",
-          amount: 9900,
-        });
-      },
-      prefill: {
-        name: name || "Institute Admin",
-        email: email || "institute@example.com",
-      },
-      theme: {
-        color: "#6366f1",
-      },
-    };
+        if (teamMax < teamMin) {
+          toast.error("Maximum team size cannot be less than minimum team size.");
+          return false;
+        }
+      }
+    }
+    // 3. Date parsing
+    const regStart = new Date(registrationStarts);
+    const regEnd = new Date(registrationEnds);
+    const startDate = new Date(fromDate);
+    const endDate = new Date(toDate);
+    const now = new Date();
 
-    const razor = new (window as any).Razorpay(options);
-    razor.open();
+    // Ensure all dates are valid
+    if ([regStart, regEnd, startDate, endDate].some(d => isNaN(d.getTime()))) {
+      toast.error("Invalid date provided. Please check all dates again.");
+      return false;
+    }
+
+    // 4. Logical date comparisons
+    if (regStart > regEnd) {
+      toast.error("Registration start date cannot be after registration end date.");
+      return false;
+    }
+
+    if (regEnd > startDate) {
+      toast.error("Registration must close before the event starts.");
+      return false;
+    }
+
+    if (startDate > endDate) {
+      toast.error("Event start date cannot be after the end date.");
+      return false;
+    }
+
+    if (regStart < now) {
+      toast.error("Registration start date cannot be in the past.");
+      return false;
+    }
+
+    if (startDate < now) {
+      toast.error("Event cannot start in the past.");
+      return false;
+    }
+
+    return true;
   };
 
 
-  const handleSubmitAfterPayment = async (paymentData: any) => {
-    if (file) {
-      imgURL = await uploadToCloudinary(file);
-    }
+  const handlePaymentAndSubmit = async () => {
+    console.log("handling");
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setError("");
+
     try {
-      const response = await axios.get('/api/institute/itsMe', { withCredentials: true });
+      const sdkLoaded = await loadRazorpayScript();
+      if (!sdkLoaded) {
+        setError("Failed to load Razorpay SDK");
+        toast.error("Failed to load Razorpay SDK");
+        return;
+      }
+
+      const instituteRes = await axios.get("/api/institute/itsMe", {
+        withCredentials: true,
+      });
+
+      const { name, email, instituteId } = instituteRes.data;
+
+      const orderRes = await axios.post("/api/payment/create-order", {
+        amount: 9900,
+        purpose: "EventCreation",
+      });
+
+      const { order } = orderRes.data;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: order.amount,
+        currency: "INR",
+        name: "Revelo",
+        description: "Platform Fee for Event Creation",
+        order_id: order.id,
+        handler: async function (response: any) {
+          try {
+            await handleSubmitAfterPayment({
+              razorpayPaymentID: response.razorpay_payment_id,
+              razorpayOrderID: response.razorpay_order_id,
+              purpose: "EventCreation",
+              amount: 9900,
+            });
+          } catch (err) {
+            toast.error("Event creation failed after payment. Contact support.");
+            console.error("Post-payment failure:", err);
+          }
+        },
+        prefill: {
+          name: name || "Institute Admin",
+          email: email || "institute@example.com",
+        },
+        theme: {
+          color: "#6366f1",
+        },
+      };
+
+      const razor = new (window as any).Razorpay(options);
+      razor.open();
+    } catch (err) {
+      setError("Something went wrong before payment.");
+      toast.error("Something went wrong. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitAfterPayment = async (paymentData: any) => {
+    setLoading(true);
+    try {
+      imgURL = await uploadToCloudinary(file!);
+
+      const response = await axios.get('/api/institute/itsMe', {
+        withCredentials: true,
+      });
+
       const loggedInId = response.data.instituteId;
-      const res = await axios.post("/api/events/create", {
+
+      await axios.post("/api/events/create", {
         instituteID: loggedInId,
         title,
         description,
@@ -134,15 +264,24 @@ function Page() {
         registrationStarts,
         registrationEnds,
         paymentData,
+        teamRequired,
+        teamSize: { min: teamMin, max: teamMax },
+        rules: rules.filter((r) => r.trim()),
       });
 
       toast.success("Event created successfully!");
       Router.push(`/institute/dashboard/${loggedInId}`);
     } catch (err) {
-      console.error("Event creation failed:", err);
-      toast.error("Event creation failed. Try again.");
+      console.error("Event creation failed after payment:", err);
+      toast.error("Payment succeeded but event creation failed. Please contact support.");
+    } finally {
+      setLoading(false);
     }
   };
+
+
+
+
 
 
   return (
@@ -187,6 +326,7 @@ function Page() {
                 className="bg-zinc-800 text-white border-zinc-700 mt-3"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                required
               />
             </div>
 
@@ -220,6 +360,7 @@ function Page() {
               rows={6}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              required
             />
           </div>
 
@@ -247,6 +388,7 @@ function Page() {
                   accept=".png, .jpg, .jpeg, .webp"
                   onChange={handleFileChange}
                   className="hidden"
+                  required
                 />
                 {file && (
                   <p className="text-green-400 mt-2 text-sm">
@@ -335,6 +477,87 @@ function Page() {
               />
             </div>
           </div>
+          {
+            allowDirectRegistration ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <Label className="mb-1">Team Required</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={teamRequired}
+                        onChange={(e) => setTeamRequired(e.target.checked)}
+                        className="accent-purple-600"
+                      />
+                      <span className="text-sm text-zinc-300">Yes</span>
+                    </div>
+                  </div>
+                  {teamRequired && (
+                    <>
+                      <div>
+                        <Label className="mb-1">Team Min</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={teamMin}
+                          onChange={(e) => setTeamMin(Number(e.target.value))}
+                          className="bg-[#111111] text-white border-1 border-gray-200"
+                        />
+                      </div>
+                      <div>
+                        <Label className="mb-1">Team Max</Label>
+                        <Input
+                          type="number"
+                          min={teamMin}
+                          value={teamMax}
+                          onChange={(e) => setTeamMax(Number(e.target.value))}
+                          className="bg-[#111111] text-white border-1 border-gray-200"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <Label className="mb-1">Rules</Label>
+                  <div className="space-y-2">
+                    <div className="max-h-56 overflow-y-auto hide-scrollbar bg-[#121010d0] rounded-md p-3 space-y-2">
+                      {rules.map((r, i) => (
+                        <div key={i} className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <Input
+                              value={r}
+                              onChange={(e) => updateRule(i, e.target.value)}
+                              placeholder={`Rule ${i + 1}`}
+                              className="bg-[#1111] text-white border-1 border-gray-200"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeRule(i)}
+                            className="text-red-400 font-bold mt-1 px-2"
+                            aria-label="Remove rule"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <Button
+                        size="sm"
+                        onClick={addRule}
+                        className="mt-1"
+                        type="button"
+                      >
+                        + Add Rule
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>) : (<> </>)
+          }
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <Input
@@ -342,52 +565,59 @@ function Page() {
               value={venue}
               onChange={(e) => setVenue(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
+              required
             />
             <Input
               placeholder="City"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
+              required
             />
             <Input
               placeholder="State (optional)"
               value={state}
               onChange={(e) => setState(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
+              required
             />
             <Input
               placeholder="Country (default: India)"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
+              required
             />
             <Input
               placeholder="Pin Code (optional)"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
+              required
             />
           </div>
 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div>
-            <Label className="text-zinc-300 mb-2">Event starts</Label>
-            <Input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="bg-zinc-800 text-white border-zinc-700"
-            />
+              <Label className="text-zinc-300 mb-2">Event starts</Label>
+              <Input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="bg-zinc-800 text-white border-zinc-700"
+                required
+              />
             </div>
             <div>
-            <Label className="text-zinc-300 mb-2">Event ends</Label>
-            <Input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="bg-zinc-800 text-white border-zinc-700"
-            />
+              <Label className="text-zinc-300 mb-2">Event ends</Label>
+              <Input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="bg-zinc-800 text-white border-zinc-700"
+                required
+              />
             </div>
 
           </div>
@@ -400,6 +630,7 @@ function Page() {
                 value={registrationStarts}
                 onChange={(e) => setRegistrationStarts(e.target.value)}
                 className="bg-zinc-800 text-white border-zinc-700 mt-3"
+                required
               />
             </div>
             <div>
@@ -409,6 +640,7 @@ function Page() {
                 value={registrationEnds}
                 onChange={(e) => setRegistrationEnds(e.target.value)}
                 className="bg-zinc-800 text-white border-zinc-700 mt-3"
+                required
               />
             </div>
           </div>
@@ -416,10 +648,11 @@ function Page() {
           <div className="pt-8 flex items-center justify-center">
             <Button
               type="button"
+              disabled={loading}
               onClick={handlePaymentAndSubmit}
               className="bg-[#1111] hover:bg-[#1f1d1db5] border-1 border-gray-300 text-white px-8 py-3 rounded-md text-md font-medium transition w-2/4"
             >
-              Submit Event
+              {loading ? "Processing..." : "Submit Event"}
             </Button>
           </div>
         </CardContent>
@@ -427,5 +660,4 @@ function Page() {
     </div>
   );
 }
-
 export default Page;

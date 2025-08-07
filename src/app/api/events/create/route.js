@@ -29,6 +29,9 @@ export async function POST(req) {
             registrationStarts,
             registrationEnds,
             paymentData,
+            teamRequired,
+            teamSize,
+            rules,
         } = body;
 
 
@@ -54,9 +57,30 @@ export async function POST(req) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
         }
 
-        if (allowDirectRegistration && (!registrationFee || isNaN(registrationFee))) {
-            return NextResponse.json({ message: "Registration fee required" }, { status: 400 });
+        if (allowDirectRegistration) {
+            if (!registrationFee || isNaN(registrationFee)) {
+                return NextResponse.json({ message: "Registration fee required" }, { status: 400 });
+            }
+
+            if (!rules || !Array.isArray(rules) || rules.length === 0 || rules.some(r => !r || r.trim() === "")) {
+                return NextResponse.json({ message: "At least one valid rule is required for direct registration." }, { status: 400 });
+            }
+
+            if (teamRequired) {
+                if (!teamSize || typeof teamSize.min !== "number" || typeof teamSize.max !== "number") {
+                    return NextResponse.json({ message: "Invalid team size structure." }, { status: 400 });
+                }
+
+                if (teamSize.min < 1) {
+                    return NextResponse.json({ message: "Minimum team size must be at least 1." }, { status: 400 });
+                }
+
+                if (teamSize.max < teamSize.min) {
+                    return NextResponse.json({ message: "Maximum team size cannot be less than minimum." }, { status: 400 });
+                }
+            }
         }
+
 
         if (isTicketed && (!ticketPrice || isNaN(ticketPrice))) {
             return NextResponse.json({ message: "Ticket price required" }, { status: 400 });
@@ -77,7 +101,6 @@ export async function POST(req) {
             purpose: "EventCreation",
         });
 
-        // Create Event
         const newEvent = await Event.create({
             title,
             description,
@@ -100,7 +123,11 @@ export async function POST(req) {
             instituteID,
             isPlatformPaymentDone: true,
             paymentRef: newPayment._id,
+            teamRequired: allowDirectRegistration ? teamRequired : false,
+            teamSize: allowDirectRegistration && teamRequired ? teamSize : { min: 1, max: 1 },
+            rules: allowDirectRegistration ? rules : [],
         });
+
 
         await Institute.findByIdAndUpdate(
             instituteID,

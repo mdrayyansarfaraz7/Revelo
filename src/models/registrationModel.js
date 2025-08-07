@@ -1,16 +1,18 @@
 import mongoose from 'mongoose';
 
 const RegistrationSchema = new mongoose.Schema({
+  eventId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event'
+  },
   subEventId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SubEvent',
-    required: true
+    ref: 'SubEvent'
   },
   participant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-
   team: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Team'
@@ -29,7 +31,7 @@ const RegistrationSchema = new mongoose.Schema({
   },
 
   paymentProofUrl: {
-    type: String 
+    type: String
   }
 
 }, {

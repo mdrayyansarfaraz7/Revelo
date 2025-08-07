@@ -2,7 +2,7 @@
 import Category from "@/components/Category";
 import Header from "@/components/Header";
 import { Typewriter } from "react-simple-typewriter";
-import UpcomingSlider from "@/components/UpcomingProgrammesSlider";
+
 import { useEffect } from "react";
 import { useRouter } from 'next/navigation';
 
@@ -53,7 +53,7 @@ export default function Home() {
         </div>
       </div>
       <Category />
-      <UpcomingSlider />
+      
     </div>
   );
 }
