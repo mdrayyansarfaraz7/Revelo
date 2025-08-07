@@ -80,14 +80,46 @@ function Page() {
     };
   }, [flyerPreview]);
 
+  const validateForm = () => {
+    if (!flyerFile) {
+      toast.error("Please upload a flyer image.");
+      return false;
+    }
+    if (!description.trim()) {
+      toast.error("Please provide a description.");
+      return false;
+    }
+    if (!orientation) {
+      toast.error("Flyer orientation not detected. Please upload a valid image.");
+      return false;
+    }
+    if (tags.length === 0) {
+      toast.error("Please add at least one tag.");
+      return false;
+    }
+    if (categories.length === 0) {
+      toast.error("Please add at least one category.");
+      return false;
+    }
+    return true;
+  };
+
+
+
   const handelSubmit = async (e: any) => {
     e.preventDefault();
+
+    // 👇 Validation check
+    if (!validateForm()) return;
+
     try {
       setLoading(true);
       let flyerUrl = "";
+
       if (flyerFile) {
         flyerUrl = await uploadToCloudinary(flyerFile);
       }
+
       const formData = {
         eventId,
         flyerUrl,
@@ -98,24 +130,26 @@ function Page() {
         displayType,
         tags,
         categories
-      }
+      };
 
       const res = await axios.post('/api/events/add-flyer', formData);
-      if (res.status === 201) {
-        toast.success("Sub-event created successfully!");
 
+      if (res.status === 201) {
+        toast.success("Flyer added successfully!");
         setTimeout(() => {
           router.push(`/institute/event/${eventId}`);
-        }, 1200);
+        }, 100);
       } else {
-        toast.error("Failed to create flyer");
-        setLoading(false);
+        toast.error("Failed to add flyer. Please try again.");
       }
+
     } catch (error) {
-      console.log("Error: ", error);
+      console.error("Error:", error);
+      toast.error("Something went wrong. Please check your inputs and try again.");
+    } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#111111] text-white py-12 px-6 md:px-12">
