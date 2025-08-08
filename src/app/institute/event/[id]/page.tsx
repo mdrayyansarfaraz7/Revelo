@@ -499,25 +499,27 @@ export default function EventDetailPage() {
                             </div>
                         )}
 
-                        {/* Landscapes Section */}
-                        {videos.some((f: any) => f.videoType === "longVideo") && (
+                        {videos.some((f: any) => f.videoType === "highlight") && (
                             <div>
                                 <h2 className="text-xl font-semibold text-white mb-4">Highlights</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                                     {videos
-                                        .filter((f: any) => f.videoType === "longVideo")
+                                        .filter((f: any) => f.videoType === "highlight")
                                         .map((video: any) => (
                                             <div
                                                 key={video._id}
                                                 className="group cursor-pointer bg-[#1a1a1a] rounded-xl border border-zinc-700 overflow-hidden shadow-md hover:shadow-lg hover:border-zinc-500 transition w-full mx-auto"
                                             >
                                                 <div className="w-full bg-black">
-                                                    <div className="relative w-full aspect-[3/4] bg-black">
+                                                    <div className="relative w-full aspect-[15/9] bg-black">
                                                         <video
                                                             poster={video.thumbnailUrl}
                                                             className="absolute top-0 left-0 w-full h-full object-cover"
-                                                            muted
+
                                                             src={video.videoUrl}
+                                                            controls
+                                                            playsInline
+                                                            preload="metadata"
                                                         />
                                                     </div>
                                                 </div>
