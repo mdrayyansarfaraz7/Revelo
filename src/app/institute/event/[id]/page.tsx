@@ -17,9 +17,9 @@ import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import Link from 'next/link';
 
 interface Registration {
-  name?: string;
-  createdAt?: string;
-  [key: string]: any;
+    name?: string;
+    createdAt?: string;
+    [key: string]: any;
 }
 
 interface EventData {
@@ -37,7 +37,7 @@ interface EventData {
         pinCode?: string;
     };
     duration: string[];
-   
+
     isTicketed: boolean;
     allowDirectRegistration: boolean;
     teamRequired?: boolean;
@@ -48,7 +48,7 @@ interface EventData {
     rules?: string[];
     ticketPrice: number;
     registrations: Registration[];
-    registrationFee:number;
+    registrationFee: number;
     stats: {
         totalRegistrations: number;
         views: number;
@@ -56,6 +56,8 @@ interface EventData {
     subEvents: any[];
     flyers: any[];
     videos: any[];
+    registrationStarts: Date;
+    registrationEnds: Date;
 }
 
 
@@ -107,7 +109,9 @@ export default function EventDetailPage() {
         stats,
         subEvents,
         flyers,
-        videos
+        videos,
+        registrationEnds,
+        registrationStarts
     } = event;
 
     return (
@@ -157,7 +161,41 @@ export default function EventDetailPage() {
 
                             </div>
                         </div>
+                        <div>
+                            {
+                                (() => {
+                                    const now = new Date();
+                                    const start = new Date(registrationStarts);
+                                    const end = new Date(registrationEnds);
+
+                                    if (now < start) {
+                                        return `Registration starts on ${start.toLocaleDateString("en-US", {
+                                            day: "numeric", month: "short", year: "numeric"
+                                        })}`;
+                                    } else if (now >= start && now <= end) {
+                                        return `Registration Live (ends on ${end.toLocaleDateString("en-US", {
+                                            day: "numeric", month: "short", year: "numeric"
+                                        })})`;
+                                    } else {
+                                        return `Registration Finished (ended on ${end.toLocaleDateString("en-US", {
+                                            day: "numeric", month: "short", year: "numeric"
+                                        })})`;
+                                    }
+                                })()
+                            }
+                        </div>
+                        <div>
+                            <Link href={`/events/update/${id}`}>
+                                <button
+                                    className="px-12 py-2 border border-gray-500 bg-[#1111] text-white rounded-md transition-all duration-300 hover:shadow-xs hover:shadow-gray-700/50"
+                                >
+                                    Update Event
+                                </button>
+                            </Link>
+
+                        </div>
                     </div>
+
 
                     <div className="lg:w-[55%] w-full aspect-video relative rounded-xl overflow-hidden border border-zinc-700 shadow">
                         <Image src={thumbnail} alt={title} fill className="object-cover" />
@@ -169,14 +207,14 @@ export default function EventDetailPage() {
                         icon={<Users className="text-white w-5 h-5" />}
                         label="Registrations"
                         value={`${stats?.totalRegistrations || 0}`}
-                        
+
                     />
 
                     <StatCard
                         icon={<Eye className="text-white w-5 h-5" />}
                         label="Views"
                         value={`${stats?.views || 0}`}
-                        
+
                     />
 
                     {isTicketed && (
@@ -207,54 +245,54 @@ export default function EventDetailPage() {
             {
                 allowDirectRegistration ? (
                     <div className='mx-8'>
-<div className="mt-6 text-sm text-gray-300">
-  <h2 className="font-semibold text-base mb-1">Participation</h2>
-  <p className="text-gray-400">
-    {teamRequired ? (
-      <>
-        Team Size: <span className="font-medium text-white">{teamSize?.min || 1} - {teamSize?.max || 1}</span>
-      </>
-    ) : (
-      <>
-        Event Type: <span className="font-medium text-white">Solo Event</span>
-      </>
-    )}
-  </p>
-</div>
+                        <div className="mt-6 text-sm text-gray-300">
+                            <h2 className="font-semibold text-base mb-1">Participation</h2>
+                            <p className="text-gray-400">
+                                {teamRequired ? (
+                                    <>
+                                        Team Size: <span className="font-medium text-white">{teamSize?.min || 1} - {teamSize?.max || 1}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        Event Type: <span className="font-medium text-white">Solo Event</span>
+                                    </>
+                                )}
+                            </p>
+                        </div>
 
-{/* Rules Section */}
-{rules && (
-  <div className="mt-8">
-    <h2 className="text-xl font-semibold text-white mb-2">Rules & Guidelines</h2>
-    <ul className="list-disc list-inside space-y-2 text-gray-400 pl-2">
-      {rules.length > 0 ? (
-        rules.map((rule, index) => (
-          <li key={index} className="leading-relaxed">{rule}</li>
-        ))
-      ) : (
-        <li className="text-gray-500">No specific rules provided.</li>
-      )}
-    </ul>
-  </div>
-)}
+                        {/* Rules Section */}
+                        {rules && (
+                            <div className="mt-8">
+                                <h2 className="text-xl font-semibold text-white mb-2">Rules & Guidelines</h2>
+                                <ul className="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                                    {rules.length > 0 ? (
+                                        rules.map((rule, index) => (
+                                            <li key={index} className="leading-relaxed">{rule}</li>
+                                        ))
+                                    ) : (
+                                        <li className="text-gray-500">No specific rules provided.</li>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
 
-{/* Registrations Section */}
-<div className="mt-12">
-  <h2 className="text-2xl font-bold text-white mb-4">Registrations</h2>
-  <div className="border border-zinc-700 rounded-xl bg-[#1a1a1a] p-6 text-gray-300">
-    {registrations && registrations.length > 0 ? (
-      <ul className="space-y-2 text-left text-sm">
-        {registrations.map((reg, index) => (
-          <li key={index} className="text-zinc-300">
-            • {reg.name || `Team ${index + 1}`}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className="text-gray-500 italic">No registrations yet.</p>
-    )}
-  </div>
-</div>
+                        {/* Registrations Section */}
+                        <div className="mt-12">
+                            <h2 className="text-2xl font-bold text-white mb-4">Registrations</h2>
+                            <div className="border border-zinc-700 rounded-xl bg-[#1a1a1a] p-6 text-gray-300">
+                                {registrations && registrations.length > 0 ? (
+                                    <ul className="space-y-2 text-left text-sm">
+                                        {registrations.map((reg, index) => (
+                                            <li key={index} className="text-zinc-300">
+                                                • {reg.name || `Team ${index + 1}`}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-gray-500 italic">No registrations yet.</p>
+                                )}
+                            </div>
+                        </div>
                     </div>) : (
                     <>
                         <div className="mt-10">
