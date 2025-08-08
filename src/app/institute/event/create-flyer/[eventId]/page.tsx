@@ -109,7 +109,6 @@ function Page() {
   const handelSubmit = async (e: any) => {
     e.preventDefault();
 
-    // 👇 Validation check
     if (!validateForm()) return;
 
     try {

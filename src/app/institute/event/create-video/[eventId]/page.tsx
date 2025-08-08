@@ -85,8 +85,35 @@ const handleVideoLoad = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
     };
   }, [thumbnailPreview]);
 
+    const validateForm = () => {
+      if (!videoFile) {
+        toast.error("Please upload the video/reel");
+        return false;
+      }
+      if (!description.trim()) {
+        toast.error("Please provide a description.");
+        return false;
+      }
+      if (!thumbnailFile) {
+        toast.error("thumnail is not uploaded");
+        return false;
+      }
+      if (tags.length === 0) {
+        toast.error("Please add at least one tag.");
+        return false;
+      }
+      if (categories.length === 0) {
+        toast.error("Please add at least one category.");
+        return false;
+      }
+      return true;
+    };
+
   const handelSubmit = async (e: any) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     try {
       setLoading(true);
       let thumbnailUrl = "";
@@ -109,7 +136,7 @@ const handleVideoLoad = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
 
       const res = await axios.post('/api/events/add-video', formData);
       if (res.status === 201) {
-        toast.success("Sub-event created successfully!");
+        toast.success("video uploaded successfully!");
 
         setTimeout(() => {
           router.push(`/institute/event/${eventId}`);

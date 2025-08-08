@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { saveAs } from 'file-saver';
 
 interface TeamSize {
   min: number;
@@ -34,9 +34,12 @@ interface SubEvent {
 }
 
 function SubEventPage() {
-  const { subEventId } = useParams<{ eventId: string; subEventId: string }>();
+  const { eventId, subEventId } = useParams<{ eventId: string; subEventId: string }>();
+  const router = useRouter();
+
   const [subEventDetails, setSubEventDetails] = useState<SubEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!subEventId) return;
@@ -47,6 +50,7 @@ function SubEventPage() {
         setSubEventDetails(res.data.subevent);
       } catch (error) {
         console.error('Error fetching sub-event details:', error);
+        toast.error('Failed to fetch sub-event.');
       } finally {
         setLoading(false);
       }
@@ -54,8 +58,6 @@ function SubEventPage() {
 
     fetchSubEventDetails();
   }, [subEventId]);
-
-
 
   const prepareChartData = () => {
     if (!subEventDetails) return [];
@@ -70,6 +72,30 @@ function SubEventPage() {
 
     return Object.entries(data).map(([date, count]) => ({ date, count }));
   };
+
+const handleDelete = async () => {
+  const confirmDelete = confirm("Are you sure you want to delete this sub-event?");
+  if (!confirmDelete) return;
+
+  setDeleteLoading(true);
+  try {
+    const res = await axios.delete("/api/institute/delete-subevent", {
+      data: {
+        eventId,
+        subEventId,
+      },
+    });
+
+    toast.success("Sub-event deleted successfully.");
+    router.push(`institute/event/${eventId}`);
+  } catch (error: any) {
+    console.error(error);
+    const message = error?.response?.data?.message || "An error occurred while deleting.";
+    toast.error(message);
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   if (loading)
     return (
@@ -155,14 +181,16 @@ function SubEventPage() {
 
           {/* Action Buttons */}
           <div className="mt-6 flex flex-wrap gap-4">
-
-            {/* Future: Add PDF support */}
-            {/* <button className="px-4 py-2 border border-purple-400 rounded-md text-purple-400 hover:bg-purple-600 hover:text-white transition">
-              Export as PDF
-            </button> */}
-
-            <button className="border border-red-400 text-red-400 px-4 py-1 rounded-md hover:bg-red-600 hover:text-white transition-all">
-              Delete Sub-Event
+            <button
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className={`border px-4 py-1 rounded-md transition-all ${
+                deleteLoading
+                  ? "border-gray-400 text-gray-400 cursor-not-allowed"
+                  : "border-red-400 text-red-400 hover:bg-red-600 hover:text-white"
+              }`}
+            >
+              {deleteLoading ? "Deleting..." : "Delete Sub-Event"}
             </button>
           </div>
 
