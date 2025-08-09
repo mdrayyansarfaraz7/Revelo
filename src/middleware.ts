@@ -21,28 +21,23 @@ export async function middleware(request: NextRequest) {
     request.cookies.get("next-auth.session-token")?.value ||
     request.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  // Institute-protected routes
-  const instituteProtected =
-    pathname.startsWith("/institute/dashboard") ||
-    pathname.startsWith("/institute/event") ||
-    pathname.startsWith("/institute/create-sub-event");
-
-  if (instituteProtected && !pathname.startsWith("/institute/login")) {
+  // INSTITUTE ROUTES (except login)
+  if (pathname.startsWith("/institute") && pathname !== "/institute/login") {
     const payload = await verifyToken(instituteToken, process.env.JWT_SECRET);
     if (!payload) {
       return NextResponse.redirect(new URL("/institute/login", request.url));
     }
   }
 
-  // Admin
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // ADMIN ROUTES (except login)
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const adminPayload = await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET);
     if (!adminPayload) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
-  // User (next-auth) protected
+  // USER DASHBOARD (NextAuth)
   if (pathname.startsWith("/user/dashboard")) {
     if (!nextAuthToken) {
       return NextResponse.redirect(new URL("/auth/signin", request.url));
@@ -52,11 +47,10 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// This will cover all /institute/*, /admin/*, and /user/dashboard/*
 export const config = {
   matcher: [
-    "/institute/dashboard/:path*",
-    "/institute/event/:path*", 
-    "/institute/create-sub-event/:path*",
+    "/institute/:path*",
     "/admin/:path*",
     "/user/dashboard/:path*",
   ],

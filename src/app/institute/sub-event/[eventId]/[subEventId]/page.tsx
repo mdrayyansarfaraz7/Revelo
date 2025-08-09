@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import Link from 'next/link';
 
 interface TeamSize {
   min: number;
@@ -73,29 +74,29 @@ function SubEventPage() {
     return Object.entries(data).map(([date, count]) => ({ date, count }));
   };
 
-const handleDelete = async () => {
-  const confirmDelete = confirm("Are you sure you want to delete this sub-event?");
-  if (!confirmDelete) return;
+  const handleDelete = async () => {
+    const confirmDelete = confirm("Are you sure you want to delete this sub-event?");
+    if (!confirmDelete) return;
 
-  setDeleteLoading(true);
-  try {
-    const res = await axios.delete("/api/institute/delete-subevent", {
-      data: {
-        eventId,
-        subEventId,
-      },
-    });
+    setDeleteLoading(true);
+    try {
+      const res = await axios.delete("/api/institute/delete-subevent", {
+        data: {
+          eventId,
+          subEventId,
+        },
+      });
 
-    toast.success("Sub-event deleted successfully.");
-    router.push(`institute/event/${eventId}`);
-  } catch (error: any) {
-    console.error(error);
-    const message = error?.response?.data?.message || "An error occurred while deleting.";
-    toast.error(message);
-  } finally {
-    setDeleteLoading(false);
-  }
-};
+      toast.success("Sub-event deleted successfully.");
+      router.push(`institute/event/${eventId}`);
+    } catch (error: any) {
+      console.error(error);
+      const message = error?.response?.data?.message || "An error occurred while deleting.";
+      toast.error(message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   if (loading)
     return (
@@ -133,70 +134,80 @@ const handleDelete = async () => {
 
   return (
     <div className="bg-black text-white min-h-screen px-4 md:px-20 py-10 font-sans">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
+      <div className="bg-[#18171711] rounded-xl shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start">
         {/* Banner */}
-        <img
-          src={banner}
-          alt="Event Banner"
-          className="w-full md:w-[300px] rounded-md shadow-lg object-cover"
-        />
+        <div className="flex-shrink-0 w-full md:w-[320px]">
+          <img
+            src={banner}
+            alt="Event Banner"
+            className="w-full rounded-lg shadow-lg object-cover aspect-[8/10]"
+          />
+        </div>
 
-        {/* Info */}
-        <div className="flex-1 relative">
-          <h1 className="text-4xl font-bold">{title}</h1>
 
-          <p className="mt-2 text-gray-300">
-            <span className="font-semibold text-white">Venue:</span> {venue}
-          </p>
+        <div className="flex-1">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-snug">
+            {title}
+          </h1>
 
-          <p className="mt-1 text-gray-300">
-            <span className="font-semibold text-white">Category:</span> {category}
-          </p>
-
-          <p className="mt-1 text-2xl font-bold">
-            {eventDate} — {eventTime}
-          </p>
-
-          <div className="flex flex-wrap gap-6 mt-4 text-lg">
-            <span>
-              <span className="font-semibold">Registration Fees:</span>{' '}
-              {price === 0 ? 'Free' : `₹${price}`}
-            </span>
-
-            <span>
+          {/* Event Details */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-gray-300">
+            <p>
+              <span className="font-semibold text-white">Venue:</span> {venue}
+            </p>
+            <p>
+              <span className="font-semibold text-white">Category:</span> {category}
+            </p>
+            <p className="text-lg font-bold col-span-full">
+              {eventDate} — {eventTime}
+            </p>
+            <p>
+              <span className="font-semibold">Registration Fees:</span>{" "}
+              {price === 0 ? "Free" : `₹${price}`}
+            </p>
+            <p>
               <span className="font-semibold">
-                {teamRequired ? 'Team size:' : 'Event Type:'}
-              </span>{' '}
+                {teamRequired ? "Team size:" : "Event Type:"}
+              </span>{" "}
               {teamRequired
                 ? `${teamSize?.min || 1}-${teamSize?.max || 1}`
-                : 'Solo Event'}
-            </span>
+                : "Solo Event"}
+            </p>
           </div>
 
+          {/* Contact */}
           {contactDetails && (
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-3 text-sm text-gray-400">
               Contact: <span className="underline">{contactDetails}</span>
             </p>
           )}
 
-          {/* Action Buttons */}
-          <div className="mt-6 flex flex-wrap gap-4">
+          <div className="mt-6 flex flex-wrap gap-3">
+            {/* Delete Button */}
             <button
               onClick={handleDelete}
               disabled={deleteLoading}
-              className={`border px-4 py-1 rounded-md transition-all ${
-                deleteLoading
-                  ? "border-gray-400 text-gray-400 cursor-not-allowed"
-                  : "border-red-400 text-red-400 hover:bg-red-600 hover:text-white"
-              }`}
+              className={`px-4 py-1.5 text-sm rounded-md font-medium transition-all shadow-sm ${deleteLoading
+                  ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  : "bg-red-500 text-white hover:bg-red-600"
+                }`}
             >
               {deleteLoading ? "Deleting..." : "Delete Sub-Event"}
             </button>
+
+            {/* Update Button */}
+            <Link href={`/institute/sub-event/update/${subEventId}`}>
+              <button
+                className="px-4 py-1.5 text-sm rounded-md font-medium transition-all shadow-sm bg-amber-500 text-white hover:bg-amber-600"
+              >
+                Update Event
+              </button>
+            </Link>
           </div>
 
           {/* Rules */}
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold">Rules:</h2>
+          <div className="mt-8 bg-[#1111] p-4 rounded-lg border border-gray-700">
+            <h2 className="text-lg font-semibold text-white">Rules</h2>
             <ul className="mt-2 list-disc list-inside text-gray-400 space-y-1">
               {rules && rules.length > 0 ? (
                 rules.map((rule, index) => <li key={index}>{rule}</li>)
@@ -207,6 +218,7 @@ const handleDelete = async () => {
           </div>
         </div>
       </div>
+
 
       {/* Registration Chart */}
       <div className="mt-16">

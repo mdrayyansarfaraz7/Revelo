@@ -49,7 +49,6 @@ function Page() {
     const [event, setEvent] = useState<EventData | null>(null);
     const [loading, setLoading] = useState(false);
 
-    // Editable fields state
     const [description, setDescription] = useState("");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
@@ -80,7 +79,6 @@ function Page() {
                 const data: EventData = res.data;
                 setEvent(data);
 
-                // Prefill editable fields
                 setDescription(data.description || "");
                 setFromDate(data.duration[0].slice(0, 10) || "");
                 setToDate(data.duration[1].slice(0, 10) || "");
