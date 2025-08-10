@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Revelo
 
-## Getting Started
+## Overview
 
-First, run the development server:
+Revelo is an all-in-one platform designed to simplify the management and discovery of college festivals and events. It enables colleges and institutions to effortlessly create, organize, and promote events with detailed information such as categories, schedules, registration workflows, and multimedia assets like banners and videos.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The platform fosters seamless collaboration among event organizers, participants, and coordinators by providing a centralized, user-friendly interface for event engagement and management.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Comprehensive Event Management**  
+  Create and maintain events with rich details including categories, dates, and descriptions to suit various festival needs.
 
-## Learn More
+- **Sub-event Organization**  
+  Break down main events into sub-events, each with its own registration and management capabilities.
 
-To learn more about Next.js, take a look at the following resources:
+- **Multimedia Integration**  
+  Upload and showcase event-related media such as banners, flyers, and promotional videos to enhance event visibility.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Flexible Registration System**  
+  Facilitate both individual and team registrations with configurable registration windows and deadlines.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Role-Based Access Control**  
+  Support multiple user roles including institute admins, event coordinators, and participants, each with tailored permissions.
 
-## Deploy on Vercel
+- **Verification Workflow**  
+  Implement institute and user verification processes to ensure authenticity and maintain platform trustworthiness.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Personalized Dashboards**  
+  Provide organizers and participants with intuitive dashboards to track event details, registrations, and participation status.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Advanced Analytics and Reporting**  
+  Access detailed registration analytics with options to export reports in CSV and PDF formats.
+
+- **Responsive and Accessible Design**  
+  Deliver a consistent user experience across all devices through a fully responsive, mobile-friendly UI.
+
+- **Secure Authentication**  
+  Support secure login via email/password and Google OAuth, complemented by verification checks.
+
+- **Efficient Media Handling**  
+  Leverage Cloudinary for reliable and scalable storage and delivery of media assets.
+
+---
+
+## Technology Stack
+
+- **Frontend:** Next.js (App Router), Tailwind CSS  
+- **Backend:** Node.js with Express API routes  
+- **Database:** MongoDB Atlas  
+- **Authentication:** NextAuth.js with Credentials and Google OAuth providers  
+- **Media Storage:** Cloudinary  
+- **Payment Integration:** Razorpay (currently in test mode)  
+
+---

@@ -579,21 +579,21 @@ function Page() {
               value={state}
               onChange={(e) => setState(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
-              required
+              
             />
             <Input
               placeholder="Country (default: India)"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
-              required
+              
             />
             <Input
               placeholder="Pin Code (optional)"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
               className="bg-zinc-800 text-white border-zinc-700"
-              required
+             
             />
           </div>
 
