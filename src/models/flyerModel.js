@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 mongoose.set('autoIndex', false);
+import Event from "@/models/eventModel.js";
 
 const flyerSchema = new mongoose.Schema({
   imgUrl: {

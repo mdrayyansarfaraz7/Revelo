@@ -1,4 +1,4 @@
-import Flyer from "@/models/Flyer";
+import Flyer from "@/models/flyerModel";
 import { NextResponse } from "next/server";
 
 export async function PATCH(req, { params }) {
