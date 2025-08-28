@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "keen-slider/keen-slider.min.css";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper"; 
 import { Toaster } from 'sonner'

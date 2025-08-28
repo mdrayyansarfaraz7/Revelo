@@ -20,8 +20,6 @@ export default function FlyerReel() {
 
   const [flyers, setFlyers] = useState<Flyer[]>([]);
   const { data: session } = useSession();
-
-  // ✅ Keep track of already viewed flyers (avoid double counting)
   const [viewedFlyers, setViewedFlyers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -48,7 +46,6 @@ export default function FlyerReel() {
     fetchFlyers();
   }, [id]);
 
-  // ✅ Handle like toggle
   const handleLike = async (flyerId: string) => {
     if (!session?.user?.id) {
       alert("You need to log in to like flyers.");
@@ -68,9 +65,8 @@ export default function FlyerReel() {
     }
   };
 
-  // ✅ Handle views
   const handleView = async (flyerId: string) => {
-    if (viewedFlyers.has(flyerId)) return; // already counted
+    if (viewedFlyers.has(flyerId)) return;
     setViewedFlyers((prev) => new Set(prev).add(flyerId));
 
     try {
@@ -94,7 +90,7 @@ export default function FlyerReel() {
           }
         });
       },
-      { threshold: 0.8 } // 80% of flyer visible = count as view
+      { threshold: 0.8 }
     );
 
     const flyerEls = document.querySelectorAll(".flyer-slide");
@@ -117,7 +113,7 @@ export default function FlyerReel() {
             id={flyer._id}
             className="flyer-slide h-screen w-screen snap-start relative flex items-center justify-center"
           >
-            <div className="flex h-[90%] w-full max-w-md rounded-2xl overflow-hidden shadow-lg">
+            <div className="flex h-[90%] w-full max-w-md md:max-w-3xl rounded-2xl overflow-hidden shadow-lg relative">
               {/* Flyer image */}
               <div className="relative flex-1 flex items-center justify-center bg-black rounded-2xl">
                 <img
@@ -127,8 +123,8 @@ export default function FlyerReel() {
                 />
               </div>
 
-              {/* Likes & Views */}
-              <div className="w-16 flex flex-col items-center justify-center gap-4 text-white">
+              {/* Likes & Views (desktop/right side) */}
+              <div className="hidden md:flex w-16 flex-col items-center justify-center gap-4 text-white">
                 <button
                   onClick={() => handleLike(flyer._id)}
                   className={`transition ${
@@ -146,12 +142,33 @@ export default function FlyerReel() {
                 <Eye className="h-6 w-6 mt-4" />
                 <span className="text-xs">{flyer.views}</span>
               </div>
+
+              {/* Likes & Views (mobile/bottom overlay) */}
+              <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/60 px-6 py-2 rounded-full">
+                <button
+                  onClick={() => handleLike(flyer._id)}
+                  className={`transition ${
+                    liked ? "text-red-500" : "hover:text-red-400"
+                  }`}
+                >
+                  <Heart
+                    className={`h-6 w-6 transition-all duration-200 ${
+                      liked ? "fill-red-500" : ""
+                    }`}
+                  />
+                </button>
+                <span className="text-xs">{flyer.likesCount}</span>
+
+                <div className="flex items-center gap-1">
+                  <Eye className="h-5 w-5" />
+                  <span className="text-xs">{flyer.views}</span>
+                </div>
+              </div>
             </div>
           </div>
         );
       })}
 
-      {/* Hide scrollbar */}
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
