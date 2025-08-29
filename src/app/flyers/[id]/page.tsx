@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { Heart, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function FlyerReel() {
   const { id } = useParams();
+    const router = useRouter();
 
   interface Flyer {
     _id: string;
@@ -48,7 +49,7 @@ export default function FlyerReel() {
 
   const handleLike = async (flyerId: string) => {
     if (!session?.user?.id) {
-      alert("You need to log in to like flyers.");
+      router.push('/auth/signin');
       return;
     }
 

@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 import Banner from "@/components/Banner";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
+import "./globals.css"; 
 
 export default function Home() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function Home() {
       } catch (err) {
         console.error("Error fetching flyers:", err);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -61,8 +62,6 @@ export default function Home() {
     fetchBanners();
   }, []);
 
-  console.log(banners);
-
   const [sliderRef] = useKeenSlider<HTMLDivElement>({
     loop: banners.length > 1,
     slides: { perView: 1 },
@@ -81,8 +80,7 @@ export default function Home() {
           <div ref={sliderRef} className="keen-slider">
             {banners.map((banner) => (
               <div key={banner._id} className="keen-slider__slide">
-                
-                <Banner imageUrl={banner.imgUrl}/>
+                <Banner imageUrl={banner.imgUrl} />
               </div>
             ))}
           </div>
@@ -101,21 +99,29 @@ export default function Home() {
             <ClipLoader size={60} color="#9333ea" />
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto">
-            {flyers.map((flyer) => (
-              <Link key={flyer._id} href={`/flyers/${flyer._id}`} className="w-72 shrink-0">
-                <div className="rounded-xl overflow-hidden bg-gray-900">
-                  <img
-                    src={flyer.imgUrl}
-                    alt={flyer.description}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </Link>
-            ))}
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex flex-nowrap gap-8">
+              {flyers.map((flyer) => (
+                <Link
+                  key={flyer._id}
+                  href={`/flyers/${flyer._id}`}
+                  className="w-72 shrink-0"
+                >
+                  <div className="rounded-xl overflow-hidden bg-gray-900">
+                    <img
+                      src={flyer.imgUrl}
+                      alt={flyer.description}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
+
         )}
       </div>
+
     </div>
   );
 }
