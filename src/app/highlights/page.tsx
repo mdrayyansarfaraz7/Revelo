@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Heart, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Header from "@/components/Header";
 import { ClipLoader } from "react-spinners";
 import { Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 // Define a type for your Video schema
 type Video = {
@@ -21,18 +24,38 @@ type Video = {
   videoType: "reel" | "highlight";
   likes?: number;
   views?: number;
-  createdAt?: Date
+  createdAt?: Date;
+  likedBy?:[]
 };
 
 export default function Page() {
+  const router = useRouter();
   const [highlights, setHighlights] = useState<Video[]>([]);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  // For playing video
+  const { data: session } = useSession();
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
 
-  // Fetch highlights initially (all)
+const [viewedVideos, setViewedVideos] = useState<Set<string>>(new Set());
+
+const handleVideoProgress = async (video: HTMLVideoElement, videoId: string) => {
+  if (!session?.user?.id) return; // no views if not logged in
+
+  const progress = (video.currentTime / video.duration) * 100;
+
+  // only trigger once per video
+  if (progress >= 80 && !viewedVideos.has(videoId)) {
+    try {
+      setViewedVideos((prev) => new Set(prev).add(videoId)); // mark as viewed
+      await axios.patch(`/api/highlights/${videoId}/views`);
+      console.log(`✅ View counted for ${videoId}`);
+    } catch (err) {
+      console.error("Error updating views:", err);
+    }
+  }
+};
+
   useEffect(() => {
     fetchHighlights();
   }, []);
@@ -51,6 +74,33 @@ export default function Page() {
       console.error("Error fetching highlights:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLike = async (videoId: string) => {
+    if (!session?.user?.id) {
+      router.push("/auth/signin");
+      return;
+    }
+
+    try {
+      const res = await axios.patch(`/api/highlights/${videoId}/like`, {
+        userId: session.user.id,
+      });
+
+      const updatedVideo = res.data;
+
+      // ✅ Update highlights grid
+      setHighlights((prev) =>
+        prev.map((v) => (v._id === videoId ? updatedVideo : v))
+      );
+
+      // ✅ Also update selected video if modal is open
+      if (selectedVideo?._id === videoId) {
+        setSelectedVideo(updatedVideo);
+      }
+    } catch (err) {
+      console.error("Error toggling like:", err);
     }
   };
 
@@ -134,43 +184,79 @@ export default function Page() {
         )}
 
         {selectedVideo && (
+
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-xl p-4 max-w-3xl w-full relative">
+            <div className="bg-slate-900 rounded-2xl p-6 max-w-4xl w-full relative shadow-2xl border border-slate-700">
+
               {/* Close button */}
               <button
-                className="absolute top-2 right-2 z-50 p-2 rounded-full bg-white shadow-md hover:bg-gray-200 transition"
+                className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white/90 hover:bg-white transition shadow-md"
                 onClick={() => setSelectedVideo(null)}
                 aria-label="Close video"
               >
                 <X className="w-5 h-5 text-gray-800" />
               </button>
-              <video
-                src={selectedVideo.videoUrl}
-                controls
-                autoPlay
-                className="w-full rounded-lg"
-              />
 
-              <h2 className="mt-3 text-sm font-semibold">
-                {selectedVideo.description}
-              </h2>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {selectedVideo.tags && selectedVideo.tags.length > 0 ? (
-                  selectedVideo.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="text-purple-400 font-medium cursor-pointer hover:underline"
-                      onClick={() => fetchHighlights(tag)}
-                    >
-                      #{tag}
-                    </span>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500"></p>
-                )}
+              {/* Video Player */}
+              <div className="rounded-xl overflow-hidden border border-slate-700 shadow-lg">
+                <video
+                  src={selectedVideo.videoUrl}
+                  controls
+                  autoPlay
+                  className="w-full aspect-video bg-black"
+                  onTimeUpdate={(e) => handleVideoProgress(e.currentTarget, selectedVideo._id)}
+                />
+              </div>
+
+              {/* Video Info */}
+              <div className="mt-4 space-y-3">
+                {/* Title/Description */}
+                <h2 className="text-lg font-semibold text-white">
+                  {selectedVideo.description}
+                </h2>
+
+                {/* Likes + Views */}
+                <div className="flex items-center gap-6 text-gray-300 text-sm">
+                  {/* Views */}
+                  <div className="flex items-center gap-1">
+                    <Eye className="w-4 h-4 text-purple-400" />
+                    <span>{selectedVideo.views ?? 0} views</span>
+                  </div>
+
+                  {/* Likes */}
+                  <button
+                    onClick={() => handleLike(selectedVideo._id)}
+                    className="flex items-center gap-1 transition"
+                  >
+                    {selectedVideo.likedBy?.map(String).includes(session?.user?.id ?? "")? (
+                      <Heart className="w-4 h-4 text-red-500 fill-red-500" /> 
+                    ) : (
+                      <Heart className="w-4 h-4 text-gray-300" /> 
+                    )}
+                    <span>{selectedVideo.likes ?? 0} likes</span>
+                  </button>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {selectedVideo.tags ?? [].length > 0 ? (
+                    selectedVideo.tags ?? [].map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-medium cursor-pointer hover:bg-purple-500/30 transition"
+                        onClick={() => fetchHighlights(tag)}
+                      >
+                        #{tag}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No tags available</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
+
         )}
       </div>
     </>

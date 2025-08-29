@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import Video from "@/models/videoModel";
 
-export async function POST(req, { params }) {
+export async function PATCH(req, { params }) {
     try {
+
+
         const { userId } = await req.json();
+
+
         const video = await Video.findById(params.id);
 
         if (!video) {
@@ -14,17 +18,20 @@ export async function POST(req, { params }) {
 
         if (alreadyLiked) {
             video.likedBy.pull(userId);
-            video.likesCount = Math.max(0, video.likesCount - 1);
         } else {
             video.likedBy.push(userId);
-            video.likesCount += 1;
         }
-        await video.save();
-        return NextResponse.json(video);
 
+        // ✅ Always derive likes count from likedBy length
+        video.likes = video.likedBy.length;
+
+        await video.save();
+
+
+        return NextResponse.json(video);
     } catch (error) {
         return NextResponse.json(
-            { error: "Failed to toggle like", details: err.message },
+            { error: "Failed to toggle like", details: error.message },
             { status: 500 }
         );
     }
