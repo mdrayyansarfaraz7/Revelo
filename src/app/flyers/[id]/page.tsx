@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function FlyerReel() {
   const { id } = useParams();
-    const router = useRouter();
+  const router = useRouter();
 
   interface Flyer {
     _id: string;
@@ -23,12 +23,14 @@ export default function FlyerReel() {
   const { data: session } = useSession();
   const [viewedFlyers, setViewedFlyers] = useState<Set<string>>(new Set());
 
+  // Fetch flyers once
   useEffect(() => {
     const fetchFlyers = async () => {
       try {
         const res = await axios.get("/api/flyers?orientation=portrait");
         let allFlyers: Flyer[] = res.data;
 
+        // Reorder so current flyer comes first
         const index = allFlyers.findIndex((f) => f._id === id);
         if (index !== -1) {
           const reordered = [
@@ -47,9 +49,10 @@ export default function FlyerReel() {
     fetchFlyers();
   }, [id]);
 
+  // Likes
   const handleLike = async (flyerId: string) => {
     if (!session?.user?.id) {
-      router.push('/auth/signin');
+      router.push("/auth/signin");
       return;
     }
 
@@ -66,6 +69,7 @@ export default function FlyerReel() {
     }
   };
 
+  // Views
   const handleView = async (flyerId: string) => {
     if (viewedFlyers.has(flyerId)) return;
     setViewedFlyers((prev) => new Set(prev).add(flyerId));
@@ -81,6 +85,7 @@ export default function FlyerReel() {
     }
   };
 
+  // View tracking
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -103,72 +108,82 @@ export default function FlyerReel() {
   }, [flyers]);
 
   return (
-    <div className="h-screen w-screen overflow-y-scroll snap-y snap-mandatory bg-black no-scrollbar">
-      {flyers.map((flyer) => {
-        const liked =
-          session?.user?.id && flyer.likedBy?.includes(session.user.id);
+    <div className="relative h-screen w-screen overflow-y-scroll snap-y snap-mandatory bg-black no-scrollbar">
+      {/* Simple Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="fixed top-4 left-4 z-50 text-white"
+      >
+        <ArrowLeft className="w-7 h-7" />
+      </button>
 
-        return (
-          <div
-            key={flyer._id}
-            id={flyer._id}
-            className="flyer-slide h-screen w-screen snap-start relative flex items-center justify-center"
-          >
-            <div className="flex h-[90%] w-full max-w-md md:max-w-3xl rounded-2xl overflow-hidden shadow-lg relative">
-              {/* Flyer image */}
-              <div className="relative flex-1 flex items-center justify-center bg-black rounded-2xl">
-                <img
-                  src={flyer.imgUrl}
-                  alt={flyer.description}
-                  className="max-h-full max-w-full object-contain rounded-2xl"
-                />
-              </div>
+      {Array.from({ length: 50 }).map((_, loopIndex) =>
+        flyers.map((flyer) => {
+          const liked =
+            session?.user?.id && flyer.likedBy?.includes(session.user.id);
 
-              {/* Likes & Views (desktop/right side) */}
-              <div className="hidden md:flex w-16 flex-col items-center justify-center gap-4 text-white">
-                <button
-                  onClick={() => handleLike(flyer._id)}
-                  className={`transition ${
-                    liked ? "text-red-500" : "hover:text-red-400"
-                  }`}
-                >
-                  <Heart
-                    className={`h-6 w-6 transition-all duration-200 ${
-                      liked ? "fill-red-500" : ""
-                    }`}
+          return (
+            <div
+              key={`${flyer._id}-${loopIndex}`}
+              id={flyer._id}
+              className="flyer-slide h-screen w-screen snap-start relative flex items-center justify-center"
+            >
+              <div className="flex h-[90%] w-full max-w-md md:max-w-3xl rounded-2xl overflow-hidden shadow-lg relative">
+                {/* Flyer image */}
+                <div className="relative flex-1 flex items-center justify-center bg-black rounded-2xl">
+                  <img
+                    src={flyer.imgUrl}
+                    alt={flyer.description}
+                    className="max-h-full max-w-full object-contain rounded-2xl"
                   />
-                </button>
-                <span className="text-xs">{flyer.likesCount}</span>
+                </div>
 
-                <Eye className="h-6 w-6 mt-4" />
-                <span className="text-xs">{flyer.views}</span>
-              </div>
-
-              {/* Likes & Views (mobile/bottom overlay) */}
-              <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/60 px-6 py-2 rounded-full">
-                <button
-                  onClick={() => handleLike(flyer._id)}
-                  className={`transition ${
-                    liked ? "text-red-500" : "hover:text-red-400"
-                  }`}
-                >
-                  <Heart
-                    className={`h-6 w-6 transition-all duration-200 ${
-                      liked ? "fill-red-500" : ""
+                {/* Likes & Views (desktop) */}
+                <div className="hidden md:flex w-16 flex-col items-center justify-center gap-4 text-white">
+                  <button
+                    onClick={() => handleLike(flyer._id)}
+                    className={`transition ${
+                      liked ? "text-red-500" : "hover:text-red-400"
                     }`}
-                  />
-                </button>
-                <span className="text-xs">{flyer.likesCount}</span>
+                  >
+                    <Heart
+                      className={`h-6 w-6 transition-all duration-200 ${
+                        liked ? "fill-red-500" : ""
+                      }`}
+                    />
+                  </button>
+                  <span className="text-xs">{flyer.likesCount}</span>
 
-                <div className="flex items-center gap-1">
-                  <Eye className="h-5 w-5" />
+                  <Eye className="h-6 w-6 mt-4" />
                   <span className="text-xs">{flyer.views}</span>
+                </div>
+
+                {/* Likes & Views (mobile overlay) */}
+                <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-black/60 px-6 py-2 rounded-full">
+                  <button
+                    onClick={() => handleLike(flyer._id)}
+                    className={`transition ${
+                      liked ? "text-red-500" : "hover:text-red-400"
+                    }`}
+                  >
+                    <Heart
+                      className={`h-6 w-6 transition-all duration-200 ${
+                        liked ? "fill-red-500" : ""
+                      }`}
+                    />
+                  </button>
+                  <span className="text-xs">{flyer.likesCount}</span>
+
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-5 w-5" />
+                    <span className="text-xs">{flyer.views}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
 
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar {

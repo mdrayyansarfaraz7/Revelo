@@ -99,13 +99,13 @@ export default function Home() {
             <ClipLoader size={60} color="#9333ea" />
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-hide">
+          <div className="overflow-x-auto scrollbar-hide  px-1 md:px-8">
             <div className="flex flex-nowrap gap-8">
-              {flyers.map((flyer) => (
+              {flyers.slice(0, 4).map((flyer) => (
                 <Link
                   key={flyer._id}
                   href={`/flyers/${flyer._id}`}
-                  className="w-72 shrink-0"
+                  className="w-80 shrink-0"
                 >
                   <div className="rounded-xl overflow-hidden bg-gray-900">
                     <img

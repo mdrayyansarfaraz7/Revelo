@@ -139,10 +139,12 @@ const handleVideoProgress = async (video: HTMLVideoElement, videoId: string) => 
         {/* Video Grid */}
         {loading ? (
           <p className="text-center text-gray-500">
-            <ClipLoader color="#f681da" />
+            <ClipLoader size={60} color="#9333ea" />
           </p>
         ) : highlights.length === 0 ? (
-          <p className="text-center text-gray-500"><ClipLoader color="#8E24AA" /></p>
+                <div className="min-h-screen bg-[#1111] flex items-center justify-center text-white">
+        <ClipLoader size={60} color="#9333ea" />
+      </div>
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {highlights.map((video) => (
