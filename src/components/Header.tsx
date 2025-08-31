@@ -25,16 +25,15 @@ function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-base">
             <Link href="/" className="hover:text-purple-400 transition">Home</Link>
-            <Link href="/flyers" className="hover:text-purple-400 transition">Posters & Promos</Link>
+            <Link href="/events" className="hover:text-purple-400 transition">Events</Link>
             <Link href="/highlights" className="hover:text-purple-400 transition">Highlights</Link>
             <Link href="/tickets" className="hover:text-purple-400 transition">Passes</Link>
+            <Link href="/reels" className="hover:text-purple-400 transition">Reels</Link>
           </nav>
         </div>
 
-        {/* Right: Auth buttons (Desktop) */}
         <div className="hidden md:flex items-center space-x-4 text-sm">
           {status === "unauthenticated" ? (
             <>
@@ -85,9 +84,10 @@ function Header() {
         }`}
       >
         <Link href="/" className="hover:text-purple-400 transition">Home</Link>
-        <Link href="/flyers" className="hover:text-purple-400 transition">Posters & Promos</Link>
+        <Link href="/flyers" className="hover:text-purple-400 transition">Promos</Link>
         <Link href="/highlights" className="hover:text-purple-400 transition">Highlights</Link>
         <Link href="/tickets" className="hover:text-purple-400 transition">Passes</Link>
+        <Link href="/reels" className="hover:text-purple-400 transition">Reels</Link>
 
         <div className="pt-2 border-t border-gray-800 w-full">
           {status === "unauthenticated" ? (

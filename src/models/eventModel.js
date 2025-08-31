@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 const { Schema, model, models, Types } = mongoose;
+import "./subEventModel";
 
 mongoose.set('autoIndex', false);
 
@@ -53,7 +54,7 @@ const EventSchema = new Schema({
   }],
 
   allowDirectRegistration: { type: Boolean, default: false },
-  registrationFee: { type: Number, default: 0 }, // Optional, validated in route logic
+  registrationFee: { type: Number, default: 0 }, 
 
   isTicketed: { type: Boolean, default: false },
   ticketPrice: { type: Number, default: 0 },
