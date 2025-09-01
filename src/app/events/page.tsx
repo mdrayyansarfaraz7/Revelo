@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarDays } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+import Link from 'next/link';
 
 type EventType = {
     _id: string;
@@ -20,7 +21,6 @@ type EventType = {
     duration: string[];
 };
 
-// ✅ Format date like "31 Aug 2025"
 function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -47,7 +47,6 @@ export default function EventsPage() {
         "Contest",
     ];
 
-    // Fetch events
     useEffect(() => {
         const fetchEvents = async () => {
             try {
@@ -87,7 +86,6 @@ export default function EventsPage() {
                 </Select>
             </div>
 
-            {/* Events Grid */}
             <div className="max-w-7xl mx-auto px-4 pb-12">
                 {events.length === 0 ? (
                     <p className="text-gray-400 text-center py-10">
@@ -96,8 +94,9 @@ export default function EventsPage() {
                 ) : (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                         {events.map((event) => (
-                            <Card
-                                key={event._id}
+                            <Link key={event._id} href={`/events/${event._id}`}>
+                                                        <Card
+                                
                                 className="bg-[#1a1a1a] border border-gray-700 overflow-hidden relative"
                             >
                                 <div className="absolute z-20 top-2 right-2">
@@ -120,7 +119,6 @@ export default function EventsPage() {
 
                                 </div>
 
-                                {/* Event Details */}
                                 <CardContent className="px-4">
                                     <h2 className="text-2xl font-semibold text-white line-clamp-2">
                                         {event.title}
@@ -138,6 +136,8 @@ export default function EventsPage() {
                                     )}
                                 </CardContent>
                             </Card>
+                            </Link>
+
                         ))}
                     </div>
                 )}
