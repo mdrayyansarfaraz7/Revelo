@@ -18,9 +18,9 @@ export default function EventPage() {
       .catch((err) => console.error(err));
   }, [id]);
 
-  if (!event) return <p className="text-white p-6">
-    <ClipLoader size={60} />
-    </p>;
+  if (!event) return <p className="text-gray-400 text-center py-10">
+    <ClipLoader size={60} color="#805ad5" />
+  </p>
 
   const hasSubEvents = event?.subEvents && event.subEvents.length > 0;
 
