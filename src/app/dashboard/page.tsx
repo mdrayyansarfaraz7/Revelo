@@ -1,141 +1,227 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
-import { User, Calendar, Users, Ticket, LogOut, AlertCircle, Search, CheckCircle } from "lucide-react";
+import {
+  User,
+  Calendar,
+  Users,
+  Ticket,
+  LogOut,
+  AlertCircle,
+  Search,
+  CheckCircle,
+} from "lucide-react";
 import Image from "next/image";
+import axios from "axios";
+import { ClipLoader } from "react-spinners";
+import Link from "next/link";
 
 interface UserType {
-    id?: string;
-    name?: string | null;
-    fullName?: string;
-    email?: string | null;
-    image?: string | null;
-    instituteName?: string;
-    isVerified?: boolean;
-    createdAt?: string;
-    participation?: any[];
-    teams?: any[];
-    tickets?: any[];
+  id?: string;
+  name?: string | null;
+  fullName?: string;
+  email?: string | null;
+  profilePicture?: string | null;
+  instituteName?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  participation?: any[];
+  teams?: any[];
+  tickets?: any[];
 }
 
 export default function DashboardPage() {
-    const { data: session } = useSession();
-    const user: UserType | null = session?.user || null;
-    const [active, setActive] = useState<string>("events");
+  const { data: session } = useSession();
+  const [active, setActive] = useState<string>("events");
+  const [user, setUser] = useState<UserType | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    const displayName = user?.name || user?.email?.split("@")[0] || "Guest";
+  // fetch user dashboard details
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!session?.user?.id) return;
+      try {
+        const res = await axios.get(`/api/user/${session.user.id}/dashboard`);
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+        // fallback to session data if API fails
+        setUser(session.user as UserType);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserData();
+  }, [session?.user?.id]);
 
+  if (loading) {
     return (
-        <div className="min-h-screen flex bg-gradient-to-b from-black via-[#0b0720] to-[#07060a] text-white">
-
-            <aside className="w-72 flex-shrink-0 p-6 border-r border-[#1a1230]">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden ring-1 ring-[#2b2340]">
-                        {user?.image ? (
-                            <Image src={user.image} alt="avatar" fill sizes="48px" className="object-cover" />
-                        ) : (
-                            <div className="w-full h-full bg-gradient-to-tr from-[#2b2340] to-[#3b2b55] flex items-center justify-center">
-                                <User className="opacity-80" />
-                            </div>
-                        )}
-                    </div>
-
-                    <div>
-                        <h3 className="text-lg font-semibold leading-tight">{displayName}</h3>
-                        <p className="text-xs text-[#b9aee0] truncate max-w-[180px]">{user?.email || "Not signed in"}</p>
-                    </div>
-                </div>
-
-                {!user?.instituteName && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-4 p-3 rounded-xl bg-gradient-to-r from-[#2b1638] to-[#2b1638]/40 ring-1 ring-[#3b2b55]"
-                    >
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#351f4a] rounded-lg">
-                                <AlertCircle size={18} />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm font-semibold">Profile incomplete</p>
-                                <p className="text-xs text-[#cfc1ff] mt-1">Add your institute to register for events.</p>
-                                <button
-                                    onClick={() => setActive("profile")}
-                                    className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg bg-gradient-to-r from-[#7651ff] to-[#9a7cff] text-black font-medium shadow-sm"
-                                >
-                                    Update profile
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-
-                <nav className="mt-3 flex flex-col gap-2">
-                    <MenuButton active={active === "events"} onClick={() => setActive("events")} icon={<Calendar size={16} />}>My Events</MenuButton>
-                    <MenuButton active={active === "teams"} onClick={() => setActive("teams")} icon={<Users size={16} />}>My Teams</MenuButton>
-                    <MenuButton active={active === "tickets"} onClick={() => setActive("tickets")} icon={<Ticket size={16} />}>Tickets</MenuButton>
-                    <MenuButton active={active === "profile"} onClick={() => setActive("profile")} icon={<User size={16} />}>Profile</MenuButton>
-                </nav>
-
-                <div className="mt-auto pt-6">
-                    <button
-                        onClick={() => signOut()}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[#130a23]/60 hover:bg-[#130a23]/80 transition"
-                    >
-                        <LogOut size={16} />
-                        <span className="text-sm">Sign out</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* MAIN */}
-            <main className="flex-1 p-10">
-                <header className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
-                        <p className="text-sm text-[#b9aee0]/80 mt-1">Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""} — manage your events and teams.</p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <div className="text-sm text-[#b9aee0]">
-                            Signed in as <span className="font-medium text-white">{user?.email ? user.email : "guest"}</span>
-                        </div>
-                    </div>
-                </header>
-
-                <section className="grid grid-cols-12 gap-6">
-                    <div className="col-span-8 space-y-6">
-                        {active === "events" && <EventsTab user={user} />}
-                        {active === "teams" && <TeamsTab user={user} />}
-                        {active === "tickets" && <TicketsTab user={user} />}
-                        {active === "profile" && <ProfileTab user={user} />}
-                    </div>
-
-                    <aside className="col-span-4">
-                        <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#0e0720]/40 to-[#120a28]/30 ring-1 ring-[#2b1b44] shadow-lg">
-                            <h4 className="text-sm font-semibold mb-3">Quick Actions</h4>
-                            <div className="flex flex-col gap-3">
-                                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
-                                    <Calendar size={16} /> Register for Event
-                                </button>
-                                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
-                                    <Search size={16} /> Browse Contests
-                                </button>
-                                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
-                                    <CheckCircle size={16} /> Check Passes
-                                </button>
-                            </div>
-                        </div>
-                    </aside>
-                </section>
-            </main>
-        </div>
+      <div className="flex items-center justify-center h-screen text-white">
+        <ClipLoader size={60} color={'#8E24AA'}/>
+      </div>
     );
-}
+  }
 
-/* ---------- Small UI components below ---------- */
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+         <ClipLoader size={60} color={'#8E24AA'}/>
+      </div>
+    );
+  }
+
+  const displayName = user?.fullName || user?.name || user?.email?.split("@")[0] || "Guest";
+
+  return (
+    <div className="min-h-screen flex bg-gradient-to-b from-black via-[#0b0720] to-[#07060a] text-white">
+      {/* SIDEBAR */}
+      <aside className="w-72 flex-shrink-0 p-6 border-r border-[#1a1230]">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative w-12 h-12 rounded-2xl overflow-hidden ring-1 ring-[#2b2340]">
+            {user?.profilePicture ? (
+              <Image
+                src={user.profilePicture}
+                alt="avatar"
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-tr from-[#2b2340] to-[#3b2b55] flex items-center justify-center">
+                <User className="opacity-80" />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold leading-tight">{displayName}</h3>
+            <p className="text-xs text-[#b9aee0] truncate max-w-[180px]">
+              {user?.email || "Not signed in"}
+            </p>
+          </div>
+        </div>
+
+        {!user?.instituteName && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3 rounded-xl bg-gradient-to-r from-[#2b1638] to-[#2b1638]/40 ring-1 ring-[#3b2b55]"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-[#351f4a] rounded-lg">
+                <AlertCircle size={18} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Profile incomplete</p>
+                <p className="text-xs text-[#cfc1ff] mt-1">
+                  Add your institute to register for events.
+                </p>
+                <button
+                  onClick={() => setActive("profile")}
+                  className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg bg-gradient-to-r from-[#7651ff] to-[#9a7cff] text-black font-medium shadow-sm"
+                >
+                  Update profile
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <nav className="mt-3 flex flex-col gap-2">
+          <MenuButton
+            active={active === "events"}
+            onClick={() => setActive("events")}
+            icon={<Calendar size={16} />}
+          >
+            My Events
+          </MenuButton>
+          <MenuButton
+            active={active === "teams"}
+            onClick={() => setActive("teams")}
+            icon={<Users size={16} />}
+          >
+            My Teams
+          </MenuButton>
+          <MenuButton
+            active={active === "tickets"}
+            onClick={() => setActive("tickets")}
+            icon={<Ticket size={16} />}
+          >
+            Tickets
+          </MenuButton>
+          <MenuButton
+            active={active === "profile"}
+            onClick={() => setActive("profile")}
+            icon={<User size={16} />}
+          >
+            Profile
+          </MenuButton>
+        </nav>
+
+        <div className="mt-auto pt-6">
+          <button
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[#130a23]/60 hover:bg-[#130a23]/80 transition"
+          >
+            <LogOut size={16} />
+            <span className="text-sm">Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN */}
+      <main className="flex-1 p-10">
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
+            <p className="text-sm text-[#b9aee0]/80 mt-1">
+              Welcome back
+              {user?.name ? `, ${user.name.split(" ")[0]}` : ""} — manage your
+              events and teams.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-[#b9aee0]">
+              Signed in as{" "}
+              <span className="font-medium text-white">
+                {user?.email ? user.email : "guest"}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <section className="grid grid-cols-12 gap-6">
+          <div className="col-span-8 space-y-6">
+            {active === "events" && <EventsTab user={user} />}
+            {active === "teams" && <TeamsTab user={user} />}
+            {active === "tickets" && <TicketsTab user={user} />}
+            {active === "profile" && <ProfileTab user={user} />}
+          </div>
+
+          <aside className="col-span-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#0e0720]/40 to-[#120a28]/30 ring-1 ring-[#2b1b44] shadow-lg">
+              <h4 className="text-sm font-semibold mb-3">Quick Actions</h4>
+              <div className="flex flex-col gap-3">
+                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
+                  <Calendar size={16} /> Register for Event
+                </button>
+                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
+                  <Search size={16} /> Browse Contests
+                </button>
+                <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
+                  <CheckCircle size={16} /> Check Passes
+                </button>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  );
+}
 
 interface MenuButtonProps {
     children: React.ReactNode;
@@ -259,8 +345,8 @@ function ProfileTab({ user }: { user: UserType | null }) {
         <Card title="Profile">
             <div className="flex gap-6 items-center">
                 <div className="relative w-24 h-24 rounded-2xl overflow-hidden ring-1 ring-[#2b2340] flex-shrink-0">
-                    {user?.image ? (
-                        <Image src={user.image} alt="avatar" fill sizes="96px" className="object-cover" />
+                    {user?.profilePicture ? (
+                        <Image src={user.profilePicture} alt="avatar" fill sizes="96px" className="object-cover" />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-tr from-[#2b2340] to-[#3b2b55] flex items-center justify-center">
                             <User className="opacity-80" size={36} />
@@ -289,7 +375,10 @@ function ProfileTab({ user }: { user: UserType | null }) {
                     </div>
 
                     <div className="col-span-2 mt-2">
+                        <Link href={'/dashboard/update-profile'}>
                         <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#5b3bff] to-[#9178ff] text-black font-semibold">Edit profile</button>
+                        </Link>
+                        
                     </div>
                 </div>
             </div>

@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // USER DASHBOARD (NextAuth)
-  if (pathname.startsWith("/user/dashboard")) {
+  if (pathname.startsWith("/dashboard")) {
     if (!nextAuthToken) {
       return NextResponse.redirect(new URL("/auth/signin", request.url));
     }
@@ -47,11 +47,11 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// This will cover all /institute/*, /admin/*, and /user/dashboard/*
+
 export const config = {
   matcher: [
     "/institute/:path*",
     "/admin/:path*",
-    "/user/dashboard/:path*",
+    "/dashboard/:path*",
   ],
 };

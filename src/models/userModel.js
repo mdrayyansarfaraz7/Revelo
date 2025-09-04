@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import Team from '@/models/teamModel.js'
+import SubEvent from '@/models/subEventModel.js'
+import Event from '@/models/eventModel.js'
+import Institute from '@/models/instituteModel.js'
 
 const UserSchema = new mongoose.Schema(
   {
