@@ -9,10 +9,17 @@ export async function GET(req, { params }) {
     const { id } = params;
 
     const user = await User.findById(id)
-      .populate("instituteRef")  
-      .populate("teams")          
-      .populate("participation")  
-      .populate("coordinatorFor"); 
+  .populate("instituteRef")
+  .populate("participation")
+  .populate("coordinatorFor")
+  .populate({
+    path: "teams",
+    populate: [
+      { path: "eventRef"},
+      { path: "leader", model: "User", select: "fullName profilePicture" },
+      { path: "members", model: "User", select: "fullName profilePicture" },
+    ],
+  });
 
     if (!user) {
       return NextResponse.json(

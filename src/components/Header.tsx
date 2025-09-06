@@ -9,6 +9,8 @@ function Header() {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  console.log(session?.user);
+
   return (
     <header className="w-full bg-[#111111] text-white px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">

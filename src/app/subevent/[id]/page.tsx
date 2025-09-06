@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import { Calendar, MapPin, Users, Mail } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+import Link from "next/link";
 
 type TeamSize = {
   min: number;
@@ -67,7 +68,7 @@ export default function SubEventPage() {
 
           {/* Right - Event Details */}
           <div className="flex flex-col justify-center space-y-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-white  ">
               {subevent.title}
             </h1>
             <p className="text-gray-300 text-lg">{subevent.category}</p>
@@ -120,25 +121,42 @@ export default function SubEventPage() {
         )}
 
         {/* Actions */}
-        <section className="mt-10 max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {subevent.teamRequired && (
-              <button
-                onClick={() => alert("Team creation flow")}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-6 py-3 rounded-xl text-white font-semibold shadow-lg transition-all"
-              >
-                Form a Team
+        <section className="mt-10 max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {subevent.teamRequired ? (
+              <>
+                {/* Form a Team */}
+                <Link href={`/subevent/${id}/create-team`} className="flex-1">
+                  <button
+                    className="w-full px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition"
+                  >
+                    Form a Team
+                  </button>
+                </Link>
+
+                {/* Join a Team */}
+                <Link href={`/subevent/${id}/join-team`}>
+                                <button
+                  className="flex-1 px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition"
+                >
+                  Join a Team
+                </button>
+                </Link>
+
+
+                {/* Register (always visible) */}
+                <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+                  Register
+                </button>
+              </>
+            ) : (
+              <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+                Register
               </button>
             )}
-
-            <button
-              onClick={() => alert("Register flow")}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-6 py-3 rounded-xl text-white font-semibold shadow-lg transition-all"
-            >
-              Register Now
-            </button>
           </div>
         </section>
+
       </div>
 
     </>
