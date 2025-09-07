@@ -3,40 +3,45 @@ import mongoose from 'mongoose';
 const RegistrationSchema = new mongoose.Schema({
   eventId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Event'
+    ref: 'Event',
+    required: true
   },
   subEventId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SubEvent'
+    ref: 'SubEvent',
+    required: true
   },
-  participant: {
+
+  // Who registered (solo participant or team leader)
+  registeredBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
+
+  // Only if it's a team registration
   team: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Team'
   },
 
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+  // Solo vs Team
+  isTeam: {
+    type: Boolean,
+    required: true
   },
 
-  paymentStatus: {
+  // Razorpay details (always required, since payment is mandatory)
+  orderId: {
     type: String,
-    enum: ['unpaid', 'paid', 'under_review'],
-    default: 'unpaid'
+    required: true
+  },
+  paymentId: {
+    type: String,
+    required: true
   },
 
-  paymentProofUrl: {
-    type: String
-  }
-
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
 const Registration = mongoose.models.Registration || mongoose.model('Registration', RegistrationSchema);
 export default Registration;

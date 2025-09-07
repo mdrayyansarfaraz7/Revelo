@@ -73,7 +73,26 @@ const InstituteSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Event'
         }
+    ],
+
+    earnings: [
+        {
+            eventId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Event',
+                required: true
+            },
+            pendingEarnings: {
+                type: Number,
+                default: 0
+            },
+            totalEarnings: {
+                type: Number,
+                default: 0
+            }
+        }
     ]
+
 }, {
     timestamps: true
 });
