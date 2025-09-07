@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await dbConnect();
 
-    const institutes = await Institute.find({}, { _id: 1, instituteName: 1 });
+    const institutes = await Institute.find({}, { _id: 1, instituteName: 1, logo: 1 });
 
     return NextResponse.json(
       { success: true, data: institutes },

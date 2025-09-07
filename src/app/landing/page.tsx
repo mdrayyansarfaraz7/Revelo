@@ -1,10 +1,12 @@
 'use client';
-import Category from "@/components/Category";
+
 import Header from "@/components/Header";
 import { Typewriter } from "react-simple-typewriter";
 
 import { useEffect } from "react";
 import { useRouter } from 'next/navigation';
+import TrustedByInstitutes from "@/components/TrustedByInstitutes";
+import ParticipateEvents from "@/components/ParticipateEvents";
 
 
 
@@ -55,7 +57,9 @@ function page() {
           </h3>
         </div>
       </div>
-      <Category />
+     
+      <ParticipateEvents/>
+       <TrustedByInstitutes/>
       
     </div>
   )
