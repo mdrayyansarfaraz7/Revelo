@@ -144,15 +144,19 @@ export default function SubEventPage() {
                 </Link>
 
 
-                {/* Register (always visible) */}
-                <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
-                  Register
-                </button>
-              </>
-            ) : (
-              <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+              <Link href={`/subevent/${id}/register`}>
+                      <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
                 Register
               </button>
+              </Link>
+              </>
+            ) : (
+              <Link href={`/subevent/${id}/register`}>
+                      <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+                Register
+              </button>
+              </Link>
+
             )}
           </div>
         </section>

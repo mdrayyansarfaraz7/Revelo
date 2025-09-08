@@ -19,6 +19,7 @@ import Image from "next/image";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import Link from "next/link";
+import dayjs from "dayjs";
 
 interface UserType {
   id?: string;
@@ -320,53 +321,81 @@ function MenuButton({
 
 
 function EventsTab({ user }: { user: UserType | null }) {
-  const upcoming = user?.participation?.filter((e: any) => new Date(e.date) > new Date()) || [];
-  const past = user?.participation?.filter((e: any) => new Date(e.date) <= new Date()) || [];
+  const participations =
+    user?.participation?.map((p: any) => ({
+      _id: p._id,
+      title: p.itemId?.title,
+      date: p.itemId?.scheduledAt,
+      venue: p.itemId?.venue,
+      status: "registered", // or derive from registrationId if needed
+    })) || [];
+
+  const upcoming = participations.filter((e) => e.date && new Date(e.date) > new Date());
+  const past = participations.filter((e) => e.date && new Date(e.date) <= new Date());
+
+  const Section = ({
+    title,
+    events,
+    emptyText,
+  }: {
+    title: string;
+    events: typeof participations;
+    emptyText: string;
+  }) => (
+    <Card>
+      <motion.h2
+        initial={{ x: -15, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="text-lg font-bold text-white mb-4 flex items-center gap-2"
+      >
+        <Calendar className="w-5 h-5 text-purple-400" />
+        {title}
+      </motion.h2>
+
+      {events.length ? (
+        <ul className="space-y-3">
+          {events.map((e) => (
+            <motion.li
+              key={e._id}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 rounded-xl bg-[#0f0720]/60 border border-[#2b1b47]/50 hover:bg-[#1a0f33]/60 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-white">{e.title || "Untitled"}</h3>
+                  <p className="text-xs text-[#cfc1ff]">
+                    {e.date ? dayjs(e.date).format("MMM D, YYYY h:mm A") : "—"}
+                  </p>
+                  {e.venue && (
+                    <p className="text-xs text-[#9b8ac7]">Venue: {e.venue}</p>
+                  )}
+                </div>
+                <span className="px-2 py-1 text-xs rounded-full bg-purple-600/20 text-purple-300">
+                  {e.status}
+                </span>
+              </div>
+            </motion.li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-[#cfc1ff] text-center py-6 bg-[#0f0720]/40 rounded-xl">
+          <AlertCircle className="inline w-4 h-4 mr-2 text-purple-400" />
+          {emptyText}
+        </p>
+      )}
+    </Card>
+  );
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <Card title="Upcoming Events">
-        {upcoming.length ? (
-          <ul className="space-y-3">
-            {upcoming.map((e: any) => (
-              <li key={e._id} className="p-3 rounded-lg bg-[#0f0720]/40">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold">{e.title || e.name || 'Untitled'}</div>
-                    <div className="text-xs text-[#cfc1ff]">{e.date ? new Date(e.date).toLocaleString() : '—'}</div>
-                  </div>
-                  <div className="text-xs text-[#b9aee0]">{e.status || 'registered'}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-[#cfc1ff]">No upcoming events.</p>
-        )}
-      </Card>
-
-      <Card title="Past Events">
-        {past.length ? (
-          <ul className="space-y-3">
-            {past.map((e: any) => (
-              <li key={e._id} className="p-3 rounded-lg bg-[#0f0720]/40">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold">{e.title || e.name || 'Untitled'}</div>
-                    <div className="text-xs text-[#cfc1ff]">{e.date ? new Date(e.date).toLocaleString() : '—'}</div>
-                  </div>
-                  <div className="text-xs text-[#b9aee0]">{e.status || 'attended'}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-[#cfc1ff]">No past events.</p>
-        )}
-      </Card>
+      <Section title="Upcoming Events" events={upcoming} emptyText="No upcoming events." />
+      <Section title="Past Events" events={past} emptyText="No past events." />
     </motion.div>
   );
 }
+
 
 function TeamsTab({ user }: { user: UserType | null }) {
   // filter out teams whose event is already completed

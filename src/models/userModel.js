@@ -3,6 +3,7 @@ import Team from '@/models/teamModel.js'
 import SubEvent from '@/models/subEventModel.js'
 import Event from '@/models/eventModel.js'
 import Institute from '@/models/instituteModel.js'
+import Registration from "@/models/registrationModel.js"
 
 const UserSchema = new mongoose.Schema(
   {
@@ -70,13 +71,25 @@ const UserSchema = new mongoose.Schema(
       },
     ],
 
-    participation: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SubEvent",
-        default: [],
-      },
-    ],
+participation: [
+  {
+    itemId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "participation.itemType", 
+    },
+    itemType: {
+      type: String,
+      enum: ["Event", "SubEvent"],
+      required: true,
+    },
+    registrationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Registration", 
+    },
+  },
+],
+
 
     IdProof: {
       type: String,

@@ -4,22 +4,20 @@ const RegistrationSchema = new mongoose.Schema({
   eventId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event',
-    required: true
+   
   },
   subEventId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'SubEvent',
-    required: true
+
   },
 
-  // Who registered (solo participant or team leader)
   registeredBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
-  // Only if it's a team registration
   team: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Team'

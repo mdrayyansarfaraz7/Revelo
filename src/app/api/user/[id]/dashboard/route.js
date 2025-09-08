@@ -9,17 +9,25 @@ export async function GET(req, { params }) {
     const { id } = params;
 
     const user = await User.findById(id)
-  .populate("instituteRef")
-  .populate("participation")
-  .populate("coordinatorFor")
-  .populate({
-    path: "teams",
-    populate: [
-      { path: "eventRef"},
-      { path: "leader", model: "User", select: "fullName profilePicture" },
-      { path: "members", model: "User", select: "fullName profilePicture" },
-    ],
-  });
+      .populate("instituteRef")
+      .populate("coordinatorFor")
+      .populate({
+        path: "teams",
+        populate: [
+          { path: "eventRef" },
+          { path: "leader", model: "User", select: "fullName profilePicture" },
+          { path: "members", model: "User", select: "fullName profilePicture" },
+        ],
+      })
+
+      .populate({
+        path: "participation.itemId",
+      })
+ 
+      .populate({
+        path: "participation.registrationId",
+      });
+
 
     if (!user) {
       return NextResponse.json(

@@ -23,6 +23,7 @@
     "cloudinary": "^1.41.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.18",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.12",
     "jose": "^6.0.12",
