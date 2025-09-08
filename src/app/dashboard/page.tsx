@@ -322,16 +322,28 @@ function MenuButton({
 
 function EventsTab({ user }: { user: UserType | null }) {
   const participations =
-    user?.participation?.map((p: any) => ({
+  user?.participation?.map((p: any) => {
+    const isSubEvent = p.itemType === "SubEvent";
+
+    return {
       _id: p._id,
       title: p.itemId?.title,
-      date: p.itemId?.scheduledAt,
-      venue: p.itemId?.venue,
-      status: "registered", // or derive from registrationId if needed
-    })) || [];
+      date: isSubEvent ? p.itemId?.scheduledAt : p.itemId?.duration?.[0],
+      venue: isSubEvent ? p.itemId?.venue : p.itemId?.location?.venue,
+      status: "registered",
+    };
+  }) || [];
 
-  const upcoming = participations.filter((e) => e.date && new Date(e.date) > new Date());
-  const past = participations.filter((e) => e.date && new Date(e.date) <= new Date());
+console.log(participations);
+
+const upcoming = participations.filter(
+  (e) => e.date && new Date(e.date) > new Date()
+);
+console.log(upcoming);
+
+const past = participations.filter(
+  (e) => e.date && new Date(e.date) <= new Date()
+);
 
   const Section = ({
     title,
