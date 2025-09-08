@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import SubEvent from '@/models/subEventModel.js'
+import Event from '@/models/eventModel.js'
+import User from '@/models/userModel.js'
 
 const RegistrationSchema = new mongoose.Schema({
   eventId: {

@@ -22,53 +22,68 @@ interface TeamData {
   members: TeamMember[];
 }
 
-interface SubEvent {
+interface Event {
   _id: string;
   title: string;
   category: string;
   banner: string;
-  price?: number;
+  registrationFee?: number;
+  allowDirectRegistration: boolean;
   teamRequired: boolean;
   teamSize: { min: number; max: number };
 }
 
-export default function RegisterPage() {
+export default function RegisterEventPage() {
   const params = useParams();
   const router = useRouter();
-  const subEventId = params.id as string;
-  
+  const eventId = params.id as string;
 
-  const [subEvent, setSubEvent] = useState<SubEvent | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(false);
   const [joiningCode, setJoiningCode] = useState("");
   const [teamData, setTeamData] = useState<TeamData | null>(null);
-const { update } = useSession();
-  // Fetch subevent details
+  const { update } = useSession();
+
+  // Fetch event details
   useEffect(() => {
-    const fetchSubEvent = async () => {
+    const fetchEvent = async () => {
+      console.log("Fetching event details for ID:", eventId);
       try {
-        const res = await axios.get(`/api/sub-events/${subEventId}`);
-        setSubEvent(res.data.subevent);
-      } catch {
-        toast.error("Failed to load subevent.");
+        const res = await axios.get(`/api/events/${eventId}`);
+        console.log("Event fetch response:", res.data);
+        setEvent(res.data); // ✅ FIX
+      } catch (err) {
+        console.error("Failed to load event:", err);
+        toast.error("Failed to load event.");
       }
     };
-    if (subEventId) fetchSubEvent();
-  }, [subEventId]);
+    if (eventId) fetchEvent();
+  }, [eventId]);
 
   // Join team handler
   const handleJoinTeam = async () => {
     if (!joiningCode) return toast.error("Enter team code!");
     try {
       setLoading(true);
+      console.log("Verifying team with code:", joiningCode);
       const res = await axios.post(`/api/team/verify`, {
         joiningCode,
-        subEventId,
-         eventModel:"SubEvent"
+        eventId,
+        eventModel:"Event"
       });
+      console.log("Team verify response:", res.data);
+      if (
+        res.data.team.members.length  < event!.teamSize.min ||
+        res.data.team.members.length  > event!.teamSize.max
+      ) {
+        toast.error("Team size does not match the event criteria.");
+        console.warn("Team size mismatch:", res.data.team.members.length + 1);
+        return;
+      }
       setTeamData(res.data.team);
       toast.success("Team verified!");
     } catch (err: any) {
+      console.error("Team verification failed:", err);
       toast.error(err?.response?.data?.error || "Team verification failed.");
     } finally {
       setLoading(false);
@@ -77,56 +92,78 @@ const { update } = useSession();
 
   // Register handler
   const handleRegister = async () => {
-    if (subEvent?.teamRequired && !teamData) {
-      return toast.error("Please join a valid team first.");
+    if (!event) {
+      toast.error("Event not loaded.");
+      console.warn("No event data while registering.");
+      return;
+    }
+
+    if (!event.allowDirectRegistration) {
+      toast.error("Direct registration not allowed for this event.");
+      console.warn("Tried registering for event without direct registration.");
+      return;
+    }
+
+    if (event.teamRequired && !teamData) {
+      toast.error("Please verify your team first.");
+      console.warn("Team required but not verified.");
+      return;
     }
 
     try {
       setLoading(true);
-      if (subEvent?.price && subEvent.price > 0) {
+      console.log("Initiating registration for event:", event);
+
+      if (event.registrationFee && event.registrationFee > 0) {
+        console.log("Paid event detected, loading Razorpay...");
         const sdkLoaded = await loadRazorpayScript();
         if (!sdkLoaded) {
           toast.error("Failed to load Razorpay SDK");
+          console.error("Razorpay SDK load failed.");
           return;
         }
 
         const orderRes = await axios.post("/api/payment/create-order", {
-          amount: subEvent.price * 100,
+          amount: event.registrationFee * 100,
         });
         const { order } = orderRes.data;
+        console.log("Order created:", order);
 
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
           amount: order.amount,
           currency: "INR",
           name: "Revelo",
-          description: `Registration for ${subEvent?.title}`,
+          description: `Registration for ${event?.title}`,
           order_id: order.id,
           handler: async function (response: any) {
+            console.log("Razorpay payment success:", response);
             try {
-              await axios.post(`/api/registration/${subEventId}`, {
-                eventModel:'SubEvent',
-                isTeam: subEvent.teamRequired,
+              await axios.post(`/api/registration/${eventId}`, {
+                eventModel:'Event',
+                isTeam: event.teamRequired,
                 team: teamData?._id,
                 orderId: response.razorpay_order_id,
                 paymentId: response.razorpay_payment_id,
               });
               toast.success("Registered successfully!");
+              await update();
               router.push("/dashboard");
-            } catch {
+            } catch (err) {
+              console.error("Registration API failed after payment:", err);
               toast.error("Registration failed after payment.");
             }
           },
-          prefill: { name: "User", email: "user@example.com" },
+          prefill: { name: "", email: "" },
           theme: { color: "#9333ea" },
         };
 
         new (window as any).Razorpay(options).open();
       } else {
-        // Free subEvent
-        await axios.post(`/api/registration/${subEventId}`, {
-          eventModel:'SubEvent',
-          isTeam: subEvent?.teamRequired,
+        console.log("Free event detected, calling registration API directly...");
+        await axios.post(`/api/registration/${eventId}`, {
+            eventModel:'Event',
+          isTeam: event.teamRequired,
           team: teamData?._id,
           orderId: "FREE_EVENT",
           paymentId: "FREE_EVENT",
@@ -135,14 +172,15 @@ const { update } = useSession();
         await update();
         router.push("/dashboard");
       }
-    } catch {
+    } catch (err) {
+      console.error("Registration process failed:", err);
       toast.error("Registration failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!subEvent) {
+  if (!event) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#111111]">
         <ClipLoader color="#9333ea" size={40} />
@@ -150,22 +188,20 @@ const { update } = useSession();
     );
   }
 
-  const isTeamEvent = subEvent.teamRequired;
-
   return (
     <div className="min-h-screen bg-[#111111] text-white flex items-center justify-center p-6">
       <div className="w-full max-w-5xl bg-[#1a1a2e] p-8 rounded-2xl shadow-lg border border-gray-800 space-y-6">
         <h1 className="text-3xl font-bold text-center text-[#9333ea]">
-          Register for {subEvent.title}
+          Register for {event.title}
         </h1>
         <p className="text-center text-gray-400">
-          {isTeamEvent
-            ? `Team Event (${subEvent.teamSize.min}-${subEvent.teamSize.max} members)`
+          {event.teamRequired
+            ? `Team Event (${event.teamSize.min}-${event.teamSize.max} members)`
             : "Solo Event"}
         </p>
 
         {/* Team Join Input */}
-        {isTeamEvent && !teamData && (
+        {event.teamRequired && !teamData && (
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <input
               type="text"
@@ -243,11 +279,13 @@ const { update } = useSession();
           {loading ? (
             <ClipLoader color="black" size={20} />
           ) : (
-            `Register ${subEvent.price && subEvent.price > 0 ? `(₹${subEvent.price})` : ""}`
+            `Register ${
+              event.registrationFee && event.registrationFee > 0
+                ? `(₹${event.registrationFee})`
+                : ""
+            }`
           )}
         </button>
-
-
       </div>
     </div>
   );

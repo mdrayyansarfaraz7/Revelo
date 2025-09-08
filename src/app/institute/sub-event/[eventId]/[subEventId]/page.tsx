@@ -59,6 +59,7 @@ function SubEventPage() {
 
     fetchSubEventDetails();
   }, [subEventId]);
+  console.log(subEventDetails);
 
   const prepareChartData = () => {
     if (!subEventDetails) return [];
@@ -188,8 +189,8 @@ function SubEventPage() {
               onClick={handleDelete}
               disabled={deleteLoading}
               className={`px-4 py-1.5 text-sm rounded-md font-medium transition-all shadow-sm ${deleteLoading
-                  ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                  : "bg-red-500 text-white hover:bg-red-600"
+                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                : "bg-red-500 text-white hover:bg-red-600"
                 }`}
             >
               {deleteLoading ? "Deleting..." : "Delete Sub-Event"}
@@ -220,7 +221,6 @@ function SubEventPage() {
       </div>
 
 
-      {/* Registration Chart */}
       <div className="mt-16">
         <h2 className="text-3xl font-bold mb-4">Registration Analytics</h2>
         {registrations.length === 0 ? (
@@ -239,20 +239,87 @@ function SubEventPage() {
       </div>
 
       {/* Registrations List */}
-      <div className="mt-16">
-        <h2 className="text-3xl font-bold">Registrations</h2>
-        <div className="mt-4 border border-gray-600 rounded-md p-6 text-center text-gray-400">
-          {registrations && registrations.length > 0 ? (
-            <ul className="space-y-2 text-left">
-              {registrations.map((reg, index) => (
-                <li key={index}>• {reg.name || `Team ${index + 1}`}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No Registrations, Yet</p>
+<div className="mt-16">
+  <h2 className="text-3xl font-bold text-white mb-4">Registrations</h2>
+
+  {registrations && registrations.length > 0 ? (
+    <div className="space-y-6">
+      {registrations.map((reg, index) => (
+        <div
+          key={index}
+          className="bg-[#1a0f33]/70 p-4 rounded-xl border border-purple-600/50 "
+        >
+          {/* Team Name and Type */}
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-purple-200">
+              {reg.team?.name || `Team ${index + 1}`}
+            </h3>
+            <span className="text-xs px-2 py-1 bg-purple-700/30 text-purple-100 rounded-full">
+              {reg.isTeam ? "Team" : "Solo"}
+            </span>
+          </div>
+
+          {/* Leader */}
+          {reg.team?.leader && (
+            <div className="mb-2">
+              <h4 className="text-sm font-medium text-white mb-1">Leader:</h4>
+              <div className="flex items-center gap-2">
+                <img
+                  src={reg.team.leader.profilePicture}
+                  alt={reg.team.leader.fullName}
+                  className="w-8 h-8 rounded-full border-2 border-purple-500"
+                />
+                <span className="text-sm text-white font-medium">
+                  {reg.team.leader.fullName}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Members */}
+          {reg.team?.members && reg.team.members.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium text-white mb-1">Members:</h4>
+              <div className="flex flex-wrap gap-2">
+                {reg.team.members.map((member: any, idx: number) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <img
+                      src={member.profilePicture}
+                      alt={member.fullName}
+                      className="w-8 h-8 rounded-full border-2 border-purple-500"
+                    />
+                    <span className="text-sm text-white">{member.fullName}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Solo fallback */}
+          {!reg.isTeam && reg.registeredBy && (
+            <div>
+              <h4 className="text-sm font-medium text-white mb-1">Participant:</h4>
+              <div className="flex items-center gap-2">
+                <img
+                  src={reg.registeredBy.profilePicture}
+                  alt={reg.registeredBy.fullName}
+                  className="w-8 h-8 rounded-full border-2 border-purple-500"
+                />
+                <span className="text-sm text-white">{reg.registeredBy.fullName}</span>
+              </div>
+            </div>
           )}
         </div>
-      </div>
+      ))}
+    </div>
+  ) : (
+    <div className="mt-4 border border-gray-600 rounded-md p-6 text-center text-gray-400">
+      <p>No Registrations Yet</p>
+    </div>
+  )}
+</div>
+
+
     </div>
   );
 }

@@ -122,40 +122,63 @@ export default function EventPage() {
               </ul>
             </>
           )}
+<div className="mt-10 flex justify-center">
+  <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
+    {event.teamRequired ? (
+      <>
+        <Link href={`/events/${id}/create-team`} className="flex-1">
+          <button
+            className="w-full px-6 py-4 rounded-xl font-semibold text-white
+                       bg-gradient-to-r from-gray-800 to-gray-900
+                       hover:from-gray-700 hover:to-gray-800
+                       shadow-lg hover:shadow-xl
+                       hover:scale-[1.02] transition-all duration-300"
+          >
+            Form a Team
+          </button>
+        </Link>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {event.teamRequired ? (
-                <>
-                  <Link href={`/events/${id}/create-team`}>
-                    <button
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-6 py-3 rounded-xl text-white font-semibold shadow-lg transition-all w-full"
-                    >
-                      Form a Team
-                    </button>
-                  </Link>
-                  <Link
-                    href={`/event/${id}/join-team`}
-                    className="px-6 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 transition inline-block"
-                  >
-                    <button
-                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-6 py-3 rounded-xl text-white font-semibold shadow-lg transition-all w-full"
-                    >
-                      Join a Team
-                    </button>
+        <Link href={`/events/${id}/join-team`} className="flex-1">
+          <button
+            className="w-full px-6 py-4 rounded-xl font-semibold text-white
+                       bg-gradient-to-r from-gray-800 to-gray-900
+                       hover:from-gray-700 hover:to-gray-800
+                       shadow-lg hover:shadow-xl
+                       hover:scale-[1.02] transition-all duration-300"
+          >
+            Join a Team
+          </button>
+        </Link>
 
-                  </Link>
+        <Link href={`/events/${id}/register`} className="flex-1">
+          <button
+            className="w-full px-6 py-4 rounded-xl font-semibold text-white
+                       bg-gradient-to-r from-gray-800 to-gray-900
+                       hover:from-gray-700 hover:to-gray-800
+                       shadow-lg hover:shadow-xl
+                       hover:scale-[1.02] transition-all duration-300"
+          >
+            Register
+          </button>
+        </Link>
+      </>
+    ) : (
+      <Link href={`/events/${id}/register`} className="flex-1">
+        <button
+          className="w-full px-6 py-4 rounded-xl font-semibold text-white
+                     bg-gradient-to-r from-gray-800 to-gray-900
+                     hover:from-gray-700 hover:to-gray-800
+                     shadow-lg hover:shadow-xl
+                     hover:scale-[1.02] transition-all duration-300"
+        >
+          Register
+        </button>
+      </Link>
+    )}
+  </div>
+</div>
 
-                </>
-              ) : (
-                <button
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-6 py-3 rounded-xl text-white font-semibold shadow-lg transition-all w-full"
-                >
-                  Register
-                </button>
-              )}
-            </div>
-          </div>
+
         </section>
       )}
     </div>

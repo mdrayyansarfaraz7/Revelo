@@ -8,7 +8,24 @@ export async function GET(req, { params }) {
   await dbConnect();
 
   try {
-    const subevent = await SubEvent.findById(id);
+const subevent = await SubEvent.findById(id)
+  .populate({
+    path: "registrations",
+    populate: [
+      { path: "registeredBy", model: "User", select: "fullName email profilePicture" },
+      { 
+        path: "team", 
+        model: "Team", 
+        select: "name members leader",
+        populate: [
+          { path: "leader", model: "User", select: "fullName profilePicture" },
+          { path: "members", model: "User", select: "fullName profilePicture" },
+        ]
+      },
+      { path: "subEventId", model: "SubEvent", select: "title scheduledAt venue" },
+      { path: "eventId", model: "Event", select: "title date venue" }
+    ],
+  });
 
     if (!subevent) {
       return NextResponse.json(
