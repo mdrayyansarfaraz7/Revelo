@@ -55,9 +55,14 @@ const SubEventSchema = new mongoose.Schema({
       message: "At least one rule is required."
     }
   },
+  parentEvent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event',
+    required: true
+  },
   registrations: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Registration'  
+    ref: 'Registration'
   }]
 }, {
   timestamps: true

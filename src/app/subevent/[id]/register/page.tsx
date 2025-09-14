@@ -64,7 +64,7 @@ const { update } = useSession();
       const res = await axios.post(`/api/team/verify`, {
         joiningCode,
         subEventId,
-         eventModel:"SubEvent"
+        eventModel:"SubEvent"
       });
       setTeamData(res.data.team);
       toast.success("Team verified!");

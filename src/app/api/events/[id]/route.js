@@ -12,7 +12,7 @@ export async function GET(req, context) {
     await dbConnect();
 
     const id = context?.params?.id;
-
+    console.log(id);
     if (!id || !/^[a-fA-F0-9]{24}$/.test(id)) {
       return NextResponse.json({ message: "Invalid event ID" }, { status: 400 });
     }

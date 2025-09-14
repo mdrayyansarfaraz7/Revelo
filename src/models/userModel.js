@@ -4,6 +4,7 @@ import SubEvent from '@/models/subEventModel.js'
 import Event from '@/models/eventModel.js'
 import Institute from '@/models/instituteModel.js'
 import Registration from "@/models/registrationModel.js"
+import Ticket from './ticketModel.js'
 
 const UserSchema = new mongoose.Schema(
   {
@@ -29,8 +30,8 @@ const UserSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required:false,
-      select: false, 
+      required: false,
+      select: false,
     },
 
     authProvider: {
@@ -55,13 +56,6 @@ const UserSchema = new mongoose.Schema(
       ref: "Institute",
     },
 
-    coordinatorFor: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-        default: [],
-      },
-    ],
 
     teams: [
       {
@@ -71,24 +65,25 @@ const UserSchema = new mongoose.Schema(
       },
     ],
 
-participation: [
-  {
-    itemId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      refPath: "participation.itemType", 
-    },
-    itemType: {
-      type: String,
-      enum: ["Event", "SubEvent"],
-      required: true,
-    },
-    registrationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Registration", 
-    },
-  },
-],
+
+    participation: [
+      {
+        itemId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          refPath: "participation.itemType",
+        },
+        itemType: {
+          type: String,
+          enum: ["Event", "SubEvent"],
+          required: true,
+        },
+        registrationId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Registration",
+        },
+      },
+    ],
 
 
     IdProof: {
@@ -108,7 +103,14 @@ participation: [
     verifyTokenExpiry: {
       type: Date,
     },
+    tickets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ticket',
+      }
+    ],
   },
+
   {
     timestamps: true,
   }

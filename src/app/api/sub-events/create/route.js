@@ -89,6 +89,7 @@ export async function POST(req) {
       contactDetails,
       rules: rules.map((r) => r.trim()).filter((r) => r),
       registrations: [],
+      parentEvent:eventId
     });
 
     console.log("✅ Sub-event created:", newSubEvent._id);

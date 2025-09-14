@@ -77,19 +77,24 @@ const InstituteSchema = new mongoose.Schema({
 
     earnings: [
         {
-            eventId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Event',
-                required: true
-            },
-            pendingEarnings: {
-                type: Number,
-                default: 0
-            },
-            totalEarnings: {
-                type: Number,
-                default: 0
-            }
+            eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
+            pendingEarnings: { type: Number, default: 0 },
+            totalEarnings: { type: Number, default: 0 },
+            platformFee: { type: Number, default: 0 }, 
+            transactions: [
+                {
+                    type: {
+                        type: String,
+                        enum: ['ticket', 'participation'],
+                        required: true
+                    },
+                    amount: Number,
+                    platformFee: Number,
+                    netAmount: Number,
+                    status: { type: String, enum: ['pending', 'settled'], default: 'pending' },
+                    createdAt: { type: Date, default: Date.now }
+                }
+            ]
         }
     ]
 

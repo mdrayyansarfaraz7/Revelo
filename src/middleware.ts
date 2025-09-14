@@ -21,8 +21,12 @@ export async function middleware(request: NextRequest) {
     request.cookies.get("next-auth.session-token")?.value ||
     request.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  // INSTITUTE ROUTES (except login)
-  if (pathname.startsWith("/institute") && pathname !== "/institute/login") {
+  // INSTITUTE ROUTES (except login + register)
+  if (
+    pathname.startsWith("/institute") &&
+    pathname !== "/institute/login" &&
+    pathname !== "/institute/register"
+  ) {
     const payload = await verifyToken(instituteToken, process.env.JWT_SECRET);
     if (!payload) {
       return NextResponse.redirect(new URL("/institute/login", request.url));
@@ -47,11 +51,6 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-
 export const config = {
-  matcher: [
-    "/institute/:path*",
-    "/admin/:path*",
-    "/dashboard/:path*",
-  ],
+  matcher: ["/institute/:path*", "/admin/:path*", "/dashboard/:path*"],
 };

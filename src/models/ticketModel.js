@@ -4,35 +4,45 @@ const TicketSchema = new mongoose.Schema({
   event: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event',
-    required: true
+    required: true,
   },
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
   },
   price: {
     type: Number,
-    required: true
+    required: true,
   },
   paymentRef: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Payment'
+    ref: 'Payment',
   },
   ticketCode: {
     type: String,
     required: true,
-    unique: true
+    unique: true, 
+  },
+  qrCode: {
+    type: String, 
   },
   issuedAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   isUsed: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-const Ticket = mongoose.models.Ticket || mongoose.model('Ticket', TicketSchema);
+const Ticket =
+  mongoose.models.Ticket || mongoose.model('Ticket', TicketSchema);
+
 export default Ticket;

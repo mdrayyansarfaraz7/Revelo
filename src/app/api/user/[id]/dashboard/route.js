@@ -10,7 +10,6 @@ export async function GET(req, { params }) {
 
     const user = await User.findById(id)
       .populate("instituteRef")
-      .populate("coordinatorFor")
       .populate({
         path: "teams",
         populate: [
@@ -20,14 +19,22 @@ export async function GET(req, { params }) {
         ],
       })
 
+
       .populate({
         path: "participation.itemId",
       })
- 
+
       .populate({
         path: "participation.registrationId",
+      })
+      .populate({
+        path: "tickets",
+        populate: {
+          path: "event",
+          select: "title thumbnail location duration"
+        },
+        select: "qrCode quantity ticketCode price issuedAt "
       });
-
 
     if (!user) {
       return NextResponse.json(

@@ -5,13 +5,11 @@ import SubEvent from "@/models/subEventModel";
 import Registration from "@/models/registrationModel";
 import User from "@/models/userModel";
 import Team from "@/models/teamModel";
+import Institute from "@/models/instituteModel";
 import { getServerSession } from "next-auth";
 
 export async function POST(req, { params }) {
-  console.log("Incoming registration request with params:", params);
-
   await dbConnect();
-  console.log("Database connected");
 
   try {
     const session = await getServerSession();
@@ -20,39 +18,25 @@ export async function POST(req, { params }) {
     }
 
     const user = await User.findOne({ email: session.user.email });
-    if (!user)
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const userId = user._id;
-    console.log("Registering user ID:", userId.toString());
-
     const { id: eventId } = params;
     const body = await req.json();
     const { eventModel, isTeam, team: teamId, orderId, paymentId } = body;
 
     if (!eventId || !eventModel) {
-      return NextResponse.json(
-        { error: "Event ID and model are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Event ID and model are required" }, { status: 400 });
     }
     if (!orderId || !paymentId) {
-      return NextResponse.json(
-        { error: "Payment details are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Payment details are required" }, { status: 400 });
     }
 
     // Pick model dynamically
     const Model = eventModel === "SubEvent" ? SubEvent : Event;
-
     const eventDoc = await Model.findById(eventId);
     if (!eventDoc)
-      return NextResponse.json(
-        { error: `${eventModel} not found` },
-        { status: 404 }
-      );
-    console.log(`${eventModel} found:`, eventDoc.title);
+      return NextResponse.json({ error: `${eventModel} not found` }, { status: 404 });
 
     // Check duplicate registration
     const exists = await Registration.findOne({
@@ -60,12 +44,9 @@ export async function POST(req, { params }) {
       eventModel,
       ...(isTeam ? { team: teamId } : { registeredBy: userId }),
     });
-    if (exists)
-      return NextResponse.json(
-        { error: "Already registered" },
-        { status: 400 }
-      );
+    if (exists) return NextResponse.json({ error: "Already registered" }, { status: 400 });
 
+    // Create registration
     const registration = await Registration.create({
       eventId,
       eventModel,
@@ -75,61 +56,102 @@ export async function POST(req, { params }) {
       orderId,
       paymentId,
     });
-    console.log("Registration created with ID:", registration._id.toString());
 
-    let participantIds = [userId]; 
-
+    // Collect participants (user or team)
+    let participantIds = [userId];
     if (isTeam) {
-      if (!teamId)
-        return NextResponse.json(
-          { error: "Team ID is required for team registration" },
-          { status: 400 }
-        );
-
       const teamDoc = await Team.findById(teamId).select("members");
-      if (!teamDoc)
-        return NextResponse.json({ error: "Team not found" }, { status: 404 });
+      if (!teamDoc) return NextResponse.json({ error: "Team not found" }, { status: 404 });
 
       participantIds = Array.from(
         new Set([...participantIds, ...teamDoc.members.map((m) => m.toString())])
       );
-      console.log("Team participants to update:", participantIds);
     }
 
-    // Update participation for all participants
-    const updatedUsers = await User.updateMany(
+    await User.updateMany(
       { _id: { $in: participantIds } },
       {
         $push: {
           participation: {
             itemId: eventId,
-            itemType: eventModel, // "Event" or "SubEvent"
+            itemType: eventModel,
             registrationId: registration._id,
           },
         },
       }
     );
-    console.log(
-      `Participation updated for ${updatedUsers.modifiedCount} users`
-    );
 
-    // Update Event/SubEvent registrations
-    const updatedEvent = await Model.findByIdAndUpdate(
+    // Update event/subEvent registrations
+    await Model.findByIdAndUpdate(
       eventId,
       { $push: { registrations: registration._id } },
       { new: true }
     );
-    console.log(
-      `${eventModel} registrations updated. Total:`,
-      updatedEvent.registrations.length
-    );
+
+    // ---------------------------------------
+    //  Earnings update logic (direct settlement)
+    // ---------------------------------------
+    let instituteId;
+
+    if (eventModel === "Event") {
+      instituteId = eventDoc.instituteID;
+    } else {
+      // For SubEvent, use parentEvent
+      const parentEvent = await Event.findById(eventDoc.parentEvent);
+      if (!parentEvent) {
+        return NextResponse.json({ error: "Parent event not found" }, { status: 404 });
+      }
+      instituteId = parentEvent.instituteID;
+    }
+
+    const institute = await Institute.findById(instituteId);
+    if (!institute) {
+      return NextResponse.json({ error: "Institute not found" }, { status: 404 });
+    }
+
+    // Amount (from event fee or subEvent price)
+    const amount =
+      eventModel === "Event"
+        ? eventDoc.registrationFee || eventDoc.ticketPrice || 0
+        : eventDoc.price || 0;
+
+    if (amount > 0) {
+      const platformFee = amount * 0.05; // 5% Revelo fee
+      const netAmount = amount - platformFee;
+
+      // Find earnings entry for this event
+      let earningsEntry = institute.earnings.find(
+        (e) => e.eventId.toString() === (eventModel === "Event" ? eventId : eventDoc.parentEvent.toString())
+      );
+
+      if (!earningsEntry) {
+        institute.earnings.push({
+          eventId: eventModel === "Event" ? eventId : eventDoc.parentEvent,
+          pendingEarnings: 0,
+          totalEarnings: 0,
+          platformFee: 0,
+          transactions: [],
+        });
+        earningsEntry = institute.earnings[institute.earnings.length - 1];
+      }
+
+      // Directly settle earnings
+      earningsEntry.totalEarnings += netAmount;
+      earningsEntry.platformFee += platformFee;
+      earningsEntry.transactions.push({
+        type: eventModel === "Event" ? "participation" : "ticket",
+        amount,
+        platformFee,
+        netAmount,
+        status: "settled",
+      });
+
+      await institute.save();
+    }
 
     return NextResponse.json({ success: true, registration }, { status: 201 });
   } catch (err) {
     console.error("Registration error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

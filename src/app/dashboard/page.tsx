@@ -509,23 +509,64 @@ function TeamsTab({ user }: { user: UserType | null }) {
 
 function TicketsTab({ user }: { user: UserType | null }) {
   return (
-    <Card title="Booked Tickets">
+<Card title="Booked Tickets">
       {user?.tickets && user.tickets.length ? (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {user.tickets.map((t: any) => (
-            <li key={t._id} className="p-3 rounded-lg bg-[#0f0720]/40">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold">{t.eventName || 'Event'}</div>
-                  <div className="text-xs text-[#cfc1ff]">Qty: {t.quantity || 1}</div>
+            <li
+              key={t._id}
+              className="p-4 rounded-xl bg-[#0f0720]/50 border border-[#2a1857] hover:shadow-lg hover:shadow-purple-500/10 transition"
+            >
+              <div className="flex items-center gap-4">
+                {/* Event Thumbnail */}
+                {t.event?.thumbnail && (
+                  <div className="relative w-20 h-20 rounded-lg overflow-hidden hidden sm:block">
+                    <Image
+                      src={t.event.thumbnail}
+                      alt={t.event.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="flex-1">
+                  {/* Event Title */}
+                  <div className="text-base font-semibold text-white">
+                    {t.event?.title || "Event"}
+                  </div>
+
+                  {/* Ticket Info */}
+                  <div className="text-xs text-[#cfc1ff] space-y-1">
+                    <p>Ticket Code: <span className="font-mono">{t.ticketCode}</span></p>
+                    <p>Quantity: {t.quantity}</p>
+                    <p>Paid: ₹{t.price}</p>
+                    <p>
+                      Issued:{" "}
+                      {new Date(t.issuedAt).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-xs text-[#b9aee0]">{t.status || 'valid'}</div>
+
+                {/* QR Code */}
+                <div className="">
+                  <img
+                    src={t.qrCode}
+                    alt="QR Code"
+                    className="w-20 h-20 rounded-md border border-[#2a1857]"
+                  />
+                </div>
               </div>
+
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-[#cfc1ff]">No tickets booked.</p>
+        <p className="text-sm text-[#cfc1ff]">No tickets booked yet.</p>
       )}
     </Card>
   );
