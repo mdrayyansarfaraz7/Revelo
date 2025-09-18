@@ -16,6 +16,7 @@ import { ClipLoader } from 'react-spinners';
 import { uploadToCloudinary } from '@/lib/uploadToCloudinary';
 import Link from 'next/link';
 
+
 interface Registration {
     name?: string;
     createdAt?: string;
@@ -116,6 +117,7 @@ export default function EventDetailPage() {
 
     return (
         <>
+            {console.log(registrations)}
             <div className="bg-[#11111] text-white p-6 md:p-10 rounded-3xl shadow-2xl border border-zinc-800">
                 <div className="flex flex-col lg:flex-row gap-10">
                     <div className="flex-1 space-y-6">
@@ -276,22 +278,72 @@ export default function EventDetailPage() {
                             </div>
                         )}
 
-                        {/* Registrations Section */}
-                        <div className="mt-12">
-                            <h2 className="text-2xl font-bold text-white mb-4">Registrations</h2>
-                            <div className="border border-zinc-700 rounded-xl bg-[#1a1a1a] p-6 text-gray-300">
-                                {registrations && registrations.length > 0 ? (
-                                    <ul className="space-y-2 text-left text-sm">
+
+
+                        <div className="mt-16">
+                            <h2 className="text-3xl font-bold text-white mb-4">Registrations</h2>
+
+                            {
+                                registrations && registrations.length > 0 ? (
+                                    <div className="space-y-6">
                                         {registrations.map((reg, index) => (
-                                            <li key={index} className="text-zinc-300">
-                                                • {reg.name || `Team ${index + 1}`}
-                                            </li>
+                                            <div
+                                                key={index}
+                                                className="bg-[#1a0f33]/70 p-4 rounded-xl border border-purple-600/50 "
+                                            >
+                                                {/* Team Name and Type */}
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className="text-lg font-semibold text-purple-200">
+                                                        {reg.team?.name}
+                                                    </h3>
+                                                    <span className="text-xs px-2 py-1 bg-purple-700/30 text-purple-100 rounded-full">
+                                                        {reg.isTeam ? "Team" : "Solo"}
+                                                    </span>
+                                                </div>
+
+                                                {/* Members */}
+                                                {reg.team?.members && reg.team.members.length > 0 && (
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-white mb-1">Members:</h4>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {reg.team.members.map((member: any, idx: number) => (
+                                                                <div key={idx} className="flex items-center gap-2">
+                                                                    <img
+                                                                        src={member.profilePicture}
+                                                                        alt={member.fullName}
+                                                                        className="w-8 h-8 rounded-full border-2 border-purple-500"
+                                                                    />
+                                                                    <span className="text-sm text-white">{member.fullName}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {!reg.isTeam && reg.registeredBy && (
+                                                    <div className="bg-gradient-to-r from-purple-600/20 to-purple-900/20 p-3 rounded-xl shadow-md border border-purple-700/30">
+                                                        <div className="flex items-center gap-3">
+                                                            <img
+                                                                src={reg.registeredBy.profilePicture}
+                                                                alt={reg.registeredBy.username}
+                                                                className="w-10 h-10 rounded-full border-2 border-purple-500 shadow-sm"
+                                                            />
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-medium text-white">
+                                                                    {reg.registeredBy.username}
+                                                                </span>
+                                                                <span className="text-xs text-gray-400">Individual Participant</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 ) : (
-                                    <p className="text-gray-500 italic">No registrations yet.</p>
+                                    <div className="mt-4 border border-gray-600 rounded-md p-6 text-center text-gray-400">
+                                        <p>No Registrations Yet</p>
+                                    </div>
                                 )}
-                            </div>
                         </div>
                     </div>) : (
                     <>

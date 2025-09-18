@@ -259,23 +259,6 @@ function SubEventPage() {
             </span>
           </div>
 
-          {/* Leader */}
-          {reg.team?.leader && (
-            <div className="mb-2">
-              <h4 className="text-sm font-medium text-white mb-1">Leader:</h4>
-              <div className="flex items-center gap-2">
-                <img
-                  src={reg.team.leader.profilePicture}
-                  alt={reg.team.leader.fullName}
-                  className="w-8 h-8 rounded-full border-2 border-purple-500"
-                />
-                <span className="text-sm text-white font-medium">
-                  {reg.team.leader.fullName}
-                </span>
-              </div>
-            </div>
-          )}
-
           {/* Members */}
           {reg.team?.members && reg.team.members.length > 0 && (
             <div>

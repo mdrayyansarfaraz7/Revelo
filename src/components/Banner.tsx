@@ -7,7 +7,7 @@ interface BannerProps {
 export default function Banner({ imageUrl }: BannerProps) {
   return (
     <div className="w-full flex justify-center py-6">
-      <div className="w-full max-w-5xl rounded-xl overflow-hidden shadow-lg">
+      <div className="w-full max-w-3xl rounded-xl overflow-hidden shadow-lg">
         <div className="relative aspect-[12/6] w-full">
           <Image
             src={imageUrl}

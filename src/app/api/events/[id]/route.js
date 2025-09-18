@@ -21,7 +21,14 @@ export async function GET(req, context) {
       .populate("subEvents")
       .populate("coordinators")
       .populate("flyers")
-      .populate("videos");
+      .populate("videos")
+      .populate({
+        path: "registrations",        
+        populate: {
+          path: "registeredBy",       
+          select: "username profilePicture",  
+        },
+      });
 
     if (!event) {
       return NextResponse.json({ message: "Event not found" }, { status: 404 });
