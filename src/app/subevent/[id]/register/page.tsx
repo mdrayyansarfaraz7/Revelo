@@ -43,6 +43,7 @@ export default function RegisterPage() {
   const [joiningCode, setJoiningCode] = useState("");
   const [teamData, setTeamData] = useState<TeamData | null>(null);
 const { update } = useSession();
+const { data: session } = useSession();
   // Fetch subevent details
   useEffect(() => {
     const fetchSubEvent = async () => {
@@ -75,72 +76,93 @@ const { update } = useSession();
     }
   };
 
-  // Register handler
-  const handleRegister = async () => {
-    if (subEvent?.teamRequired && !teamData) {
-      return toast.error("Please join a valid team first.");
+  
+const handleRegister = async () => {
+  
+  try {
+    const res = await axios.get("/api/registration/check", {
+      params: {
+        subEventId,
+        teamId: subEvent?.teamRequired ? teamData?._id : undefined,
+        userId: !subEvent?.teamRequired ? session?.user.id : undefined,
+      },
+    });
+
+    console.log(res);
+
+    if (res.data.registered) {
+      return toast.error("You or your team are already registered!");
     }
+  } catch (err) {
+    return toast.error("Failed to verify registration.");
+  }
 
-    try {
-      setLoading(true);
-      if (subEvent?.price && subEvent.price > 0) {
-        const sdkLoaded = await loadRazorpayScript();
-        if (!sdkLoaded) {
-          toast.error("Failed to load Razorpay SDK");
-          return;
-        }
+  // 2️⃣ Existing logic
+  if (subEvent?.teamRequired && !teamData) {
+    return toast.error("Please join a valid team first.");
+  }
 
-        const orderRes = await axios.post("/api/payment/create-order", {
-          amount: subEvent.price * 100,
-        });
-        const { order } = orderRes.data;
+  try {
+    setLoading(true);
 
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-          amount: order.amount,
-          currency: "INR",
-          name: "Revelo",
-          description: `Registration for ${subEvent?.title}`,
-          order_id: order.id,
-          handler: async function (response: any) {
-            try {
-              await axios.post(`/api/registration/${subEventId}`, {
-                eventModel:'SubEvent',
-                isTeam: subEvent.teamRequired,
-                team: teamData?._id,
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id,
-              });
-              toast.success("Registered successfully!");
-              router.push("/dashboard");
-            } catch {
-              toast.error("Registration failed after payment.");
-            }
-          },
-          prefill: { name: "User", email: "user@example.com" },
-          theme: { color: "#9333ea" },
-        };
-
-        new (window as any).Razorpay(options).open();
-      } else {
-        // Free subEvent
-        await axios.post(`/api/registration/${subEventId}`, {
-          eventModel:'SubEvent',
-          isTeam: subEvent?.teamRequired,
-          team: teamData?._id,
-          orderId: "FREE_EVENT",
-          paymentId: "FREE_EVENT",
-        });
-        toast.success("Registered successfully!");
-        await update();
-        router.push("/dashboard");
+    if (subEvent?.price && subEvent.price > 0) {
+      const sdkLoaded = await loadRazorpayScript();
+      if (!sdkLoaded) {
+        toast.error("Failed to load Razorpay SDK");
+        return;
       }
-    } catch {
-      toast.error("Registration failed.");
-    } finally {
-      setLoading(false);
+
+      const orderRes = await axios.post("/api/payment/create-order", {
+        amount: subEvent.price * 100,
+      });
+      const { order } = orderRes.data;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: order.amount,
+        currency: "INR",
+        name: "Revelo",
+        description: `Registration for ${subEvent?.title}`,
+        order_id: order.id,
+        handler: async function (response: any) {
+          try {
+            await axios.post(`/api/registration/${subEventId}`, {
+              eventModel: "SubEvent",
+              isTeam: subEvent.teamRequired,
+              team: teamData?._id,
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+            });
+            toast.success("Registered successfully!");
+            router.push("/dashboard");
+          } catch {
+            toast.error("Registration failed after payment.");
+          }
+        },
+        theme: { color: "#9333ea" },
+      };
+
+      new (window as any).Razorpay(options).open();
+    } else {
+      // Free subEvent
+      await axios.post(`/api/registration/${subEventId}`, {
+        eventModel: "SubEvent",
+        isTeam: subEvent?.teamRequired,
+        team: teamData?._id,
+        orderId: "FREE_EVENT",
+        paymentId: "FREE_EVENT",
+      });
+      toast.success("Registered successfully!");
+      await update();
+      router.push("/dashboard");
     }
-  };
+  } catch {
+    toast.error("Registration failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (!subEvent) {
     return (

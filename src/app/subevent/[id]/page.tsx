@@ -6,6 +6,7 @@ import axios from "axios";
 import { Calendar, MapPin, Users, Mail } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 type TeamSize = {
   min: number;
@@ -24,9 +25,14 @@ type SubEventType = {
   price: number;
   teamRequired: boolean;
   teamSize: TeamSize;
+  parentEvent: {
+    registrationStarts: string,
+    registrationEnds: string
+  };
 };
 
 export default function SubEventPage() {
+  const { data: session } = useSession();
   const { id } = useParams();
   const [subevent, setSubevent] = useState<SubEventType | null>(null);
 
@@ -44,6 +50,14 @@ export default function SubEventPage() {
 
     fetchSubEvent();
   }, [id]);
+  console.log(subevent);
+
+  const now = new Date();
+  const start = new Date(subevent?.parentEvent?.registrationStarts ?? "");
+  const end = new Date(subevent?.parentEvent?.registrationEnds ?? "");
+
+  const isRegistrationLive = now >= start && now <= end;
+  console.log(isRegistrationLive);
 
   if (!subevent) {
     return <p className="text-gray-400 text-center py-10">
@@ -120,46 +134,61 @@ export default function SubEventPage() {
           </section>
         )}
 
-        {/* Actions */}
-        <section className="mt-10 max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row gap-3">
-            {subevent.teamRequired ? (
-              <>
-                {/* Form a Team */}
-                <Link href={`/subevent/${id}/create-team`} className="flex-1">
-                  <button
-                    className="w-full px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition"
-                  >
-                    Form a Team
-                  </button>
-                </Link>
+        {session ? (
+          isRegistrationLive ? (
+            <section className="mt-10 max-w-4xl mx-auto">
+              <div className="flex flex-col sm:flex-row gap-3">
+                {subevent?.teamRequired ? (
+                  <>
+                    {/* Form a Team */}
+                    <Link href={`/subevent/${id}/create-team`} className="flex-1">
+                      <button className="w-full px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition">
+                        Form a Team
+                      </button>
+                    </Link>
 
-                {/* Join a Team */}
-                <Link href={`/subevent/${id}/join-team`}>
-                                <button
-                  className="flex-1 px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition"
-                >
-                  Join a Team
-                </button>
-                </Link>
+                    {/* Join a Team */}
+                    <Link href={`/subevent/${id}/join-team`} className="flex-1">
+                      <button className="w-full px-5 py-3 rounded-lg bg-[#1a1a2e] text-[#cfc1ff] font-medium border border-[#2e2b40] hover:bg-[#232340] transition">
+                        Join a Team
+                      </button>
+                    </Link>
 
+                    {/* Register */}
+                    <Link href={`/subevent/${id}/register`} className="flex-1">
+                      <button className="w-full px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+                        Register
+                      </button>
+                    </Link>
+                  </>
+                ) : (
+                  <Link href={`/subevent/${id}/register`} className="flex-1">
+                    <button className="w-full px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
+                      Register
+                    </button>
+                  </Link>
+                )}
+              </div>
+            </section>
+          ) : (
+            <div className="mt-10 text-center text-gray-400">
+              Registrations start on{" "}
+              <span className="font-semibold">
+                {start.toLocaleDateString(undefined, {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          )
+        ) : (
 
-              <Link href={`/subevent/${id}/register`}>
-                      <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
-                Register
-              </button>
-              </Link>
-              </>
-            ) : (
-              <Link href={`/subevent/${id}/register`}>
-                      <button className="flex-1 px-5 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">
-                Register
-              </button>
-              </Link>
+          <div className="mt-10 text-center text-gray-400">
 
-            )}
+            Please <Link href={'/auth/signin'}><span className="text-purple-400 font-semibold">sign-in</span> </Link>  to register.
           </div>
-        </section>
+        )}
 
       </div>
 

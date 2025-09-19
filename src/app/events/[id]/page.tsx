@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 export default function EventPage() {
-    const { data: session } = useSession();
+  const { data: session } = useSession();
   const { id } = useParams();
   const [event, setEvent] = useState<any>(null);
 
@@ -34,6 +34,13 @@ export default function EventPage() {
         <ClipLoader size={60} color="#805ad5" />
       </p>
     );
+
+  const now = new Date();
+  const start = new Date(event.registrationStarts);
+  const end = new Date(event.registrationEnds);
+
+  const isRegistrationLive = now >= start && now <= end;
+  const isRegistrationClosed = now > end;
 
   const hasSubEvents = event?.subEvents && event.subEvents.length > 0;
 
@@ -132,37 +139,61 @@ export default function EventPage() {
             </>
           )}
 
-          <div className="mt-10 flex justify-center">
-            <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
-              {event.teamRequired ? (
-                <>
-                  <Link href={`/events/${id}/create-team`} className="flex-1">
-                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                      Form a Team
-                    </button>
-                  </Link>
+          {session ? (
+            isRegistrationLive ? (
+              <div className="mt-10 flex justify-center">
+                <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
+                  {event?.teamRequired ? (
+                    <>
+                      <Link href={`/events/${id}/create-team`} className="flex-1">
+                        <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                          Form a Team
+                        </button>
+                      </Link>
 
-                  <Link href={`/events/${id}/join-team`} className="flex-1">
-                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                      Join a Team
-                    </button>
-                  </Link>
+                      <Link href={`/events/${id}/join-team`} className="flex-1">
+                        <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                          Join a Team
+                        </button>
+                      </Link>
 
-                  <Link href={`/events/${id}/register`} className="flex-1">
-                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                      Register
-                    </button>
-                  </Link>
-                </>
-              ) : (
-                <Link href={`/events/${id}/register`} className="flex-1">
-                  <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                    Register
-                  </button>
-                </Link>
-              )}
+                      <Link href={`/events/${id}/register`} className="flex-1">
+                        <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                          Register
+                        </button>
+                      </Link>
+                    </>
+                  ) : (
+                    <Link href={`/events/${id}/register`} className="flex-1">
+                      <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                        Register
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ) : isRegistrationClosed ? (
+              <div className="mt-10 text-center text-gray-400">
+                Registrations are closed
+              </div>
+            ) : (
+              <div className="mt-10 text-center text-gray-400">
+                Registrations start on{" "}
+                <span className="font-semibold">
+                  {start.toLocaleDateString(undefined, {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            )
+          ) : (
+            <div className="mt-10 text-center text-gray-400">
+              Please <Link href={'/auth/signin'}><span className="text-purple-400 font-semibold">sign-in</span> </Link> to register.
             </div>
-          </div>
+          )}
+
         </section>
       )}
     </div>

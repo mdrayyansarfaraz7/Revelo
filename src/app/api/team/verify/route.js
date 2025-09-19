@@ -10,13 +10,13 @@ export async function POST(req) {
     console.log("📌 Incoming team verification request");
 
     await dbConnect();
-    console.log("✅ Database connected");
+    
 
     const { joiningCode, eventId, subEventId, eventModel } = await req.json();
-    console.log("➡️ Request body:", { joiningCode, eventId, subEventId, eventModel });
+    
 
     if (!joiningCode || !eventModel) {
-      console.warn("⚠️ Missing required fields");
+     
       return NextResponse.json(
         { error: "Joining code and Event Model are required" },
         { status: 400 }
@@ -45,7 +45,7 @@ export async function POST(req) {
       select: "username profilePicture fullName email",
     });
 
-    console.log("📊 Team query result:", team ? "FOUND ✅" : "NOT FOUND ❌");
+    console.log("📊 Team query result:", team ? "FOUND " : "NOT FOUND ");
 
     if (!team) {
       return NextResponse.json(
@@ -78,11 +78,11 @@ export async function POST(req) {
     const maxTeamSize = eventDoc.teamSize?.max;
     const totalMembers = team.members.length;
 
-    console.log("📏 Team size criteria → Min:", minTeamSize, "Max:", maxTeamSize);
-    console.log("👥 Current team members count:", totalMembers);
+    console.log(" Team size criteria → Min:", minTeamSize, "Max:", maxTeamSize);
+    console.log(" Current team members count:", totalMembers);
 
     if (totalMembers < minTeamSize || totalMembers > maxTeamSize) {
-      console.warn("⚠️ Team does not meet size requirements");
+      console.warn("Team does not meet size requirements");
       return NextResponse.json(
         { error: "Team is not complete or invalid size" },
         { status: 400 }
@@ -95,12 +95,12 @@ export async function POST(req) {
       select: "username profilePicture fullName email",
     });
 
-    console.log("👤 Team leader info populated:", team.leader);
+    console.log("Team leader info populated:", team.leader);
 
-    console.log("✅ Team verification successful");
+    console.log("Team verification successful");
     return NextResponse.json({ success: true, team }, { status: 200 });
   } catch (err) {
-    console.error("❌ Team verification error:", err);
+    console.error(" Team verification error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

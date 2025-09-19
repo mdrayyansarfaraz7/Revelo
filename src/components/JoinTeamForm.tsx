@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import axios from "axios";
 import { Copy, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface JoinTeamFormProps {
   type: "event" | "subevent";
@@ -26,12 +27,13 @@ export default function JoinTeamForm({ type, id }: JoinTeamFormProps) {
     try {
       const { data } = await axios.post("/api/team/join", { joinCode });
       setSuccess({ teamId: data.teamId, joinCode: data.joinCode });
+      toast.success("Joined team successfully!");
     } catch (err: any) {
       const message =
         err.response?.data?.error ||
         err.response?.data?.message ||
         "Something went wrong.";
-      alert(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -41,9 +43,11 @@ export default function JoinTeamForm({ type, id }: JoinTeamFormProps) {
     try {
       await navigator.clipboard.writeText(success?.joinCode || "");
       setCopied(true);
+      toast.success("Join code copied!");
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error(" Copy failed:", err);
+      toast.error("Failed to copy join code.");
+      console.error("Copy failed:", err);
     }
   };
 
@@ -53,7 +57,7 @@ export default function JoinTeamForm({ type, id }: JoinTeamFormProps) {
         {!success ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
-              Join the Team 
+              Join the Team
             </h2>
 
             <input
@@ -76,7 +80,7 @@ export default function JoinTeamForm({ type, id }: JoinTeamFormProps) {
         ) : (
           <div className="text-center space-y-5">
             <h2 className="text-xl font-bold text-green-400">
-              Joined Team Successfully 
+              Joined Team Successfully
             </h2>
             <p className="text-gray-400">Your team join code:</p>
 
@@ -94,7 +98,7 @@ export default function JoinTeamForm({ type, id }: JoinTeamFormProps) {
               </button>
             </div>
 
-            <p className="text-xs text-gray-500">You’re now part of the team </p>
+            <p className="text-xs text-gray-500">You’re now part of the team</p>
 
             <div className="pt-4">
               <Link

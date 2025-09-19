@@ -48,7 +48,8 @@ export async function POST(req, { params }) {
 
     // Create registration
     const registration = await Registration.create({
-      eventId,
+      eventId: eventModel === "Event" ? eventId : null,
+      subEventId: eventModel === "SubEvent" ? eventId : null, // store subEventId if it's a SubEvent
       eventModel,
       registeredBy: userId,
       team: isTeam ? teamId : null,

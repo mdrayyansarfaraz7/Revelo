@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import axios from "axios";
 import { Copy, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface TeamFormProps {
   type: "event" | "subevent";
@@ -28,32 +29,35 @@ export default function TeamForm({ type, id }: TeamFormProps) {
         type: typeFinal,
       });
 
-      // success → set join code
       setToken(data.joinCode);
+      toast.success("Team created successfully!");
     } catch (err: any) {
       const errorData = err.response?.data;
 
       if (errorData?.joinCode) {
-        // 🚨 user already created a team → show existing join code
         setToken(errorData.joinCode);
+        toast.info("You already have a team — using existing join code.");
       } else {
         const message =
-          errorData?.error || errorData?.message || "Something went wrong. Try again.";
-        alert(message);
+          errorData?.error ||
+          errorData?.message ||
+          "Something went wrong. Try again.";
+        toast.error(message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(token);
       setCopied(true);
+      toast.success("Join code copied!");
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("❌ Failed to copy:", err);
+      toast.error("Failed to copy join code.");
+      console.error("Failed to copy:", err);
     }
   };
 
@@ -85,7 +89,7 @@ export default function TeamForm({ type, id }: TeamFormProps) {
           </form>
         ) : (
           <div className="text-center space-y-5">
-            <h2 className="text-xl font-bold text-purple-400">Team Created </h2>
+            <h2 className="text-xl font-bold text-purple-400">Team Created</h2>
             <p className="text-gray-400">
               Share this code with your teammates:
             </p>

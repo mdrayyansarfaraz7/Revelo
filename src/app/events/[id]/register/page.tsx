@@ -43,6 +43,7 @@ export default function RegisterEventPage() {
   const [joiningCode, setJoiningCode] = useState("");
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const { update } = useSession();
+  const { data: session } = useSession();
 
   // Fetch event details
   useEffect(() => {
@@ -69,12 +70,12 @@ export default function RegisterEventPage() {
       const res = await axios.post(`/api/team/verify`, {
         joiningCode,
         eventId,
-        eventModel:"Event"
+        eventModel: "Event"
       });
       console.log("Team verify response:", res.data);
       if (
-        res.data.team.members.length  < event!.teamSize.min ||
-        res.data.team.members.length  > event!.teamSize.max
+        res.data.team.members.length < event!.teamSize.min ||
+        res.data.team.members.length > event!.teamSize.max
       ) {
         toast.error("Team size does not match the event criteria.");
         console.warn("Team size mismatch:", res.data.team.members.length + 1);
@@ -90,36 +91,48 @@ export default function RegisterEventPage() {
     }
   };
 
-  // Register handler
   const handleRegister = async () => {
+
+
     if (!event) {
       toast.error("Event not loaded.");
-      console.warn("No event data while registering.");
       return;
     }
 
     if (!event.allowDirectRegistration) {
       toast.error("Direct registration not allowed for this event.");
-      console.warn("Tried registering for event without direct registration.");
       return;
     }
 
     if (event.teamRequired && !teamData) {
       toast.error("Please verify your team first.");
-      console.warn("Team required but not verified.");
       return;
     }
 
     try {
+      const res = await axios.get("/api/registration/check", {
+        params: {
+          eventId,
+          teamId: event.teamRequired ? teamData?._id : undefined,
+          userId: !event.teamRequired ? session?.user.id : undefined,
+        },
+      });
+      console.log(res);
+      if (res.data.registered) {
+        return toast.error("You or your team are already registered!");
+      }
+    } catch (err) {
+      console.error("Registration check failed:", err);
+      return toast.error("Failed to verify registration status.");
+    }
+
+    try {
       setLoading(true);
-      console.log("Initiating registration for event:", event);
 
       if (event.registrationFee && event.registrationFee > 0) {
-        console.log("Paid event detected, loading Razorpay...");
         const sdkLoaded = await loadRazorpayScript();
         if (!sdkLoaded) {
           toast.error("Failed to load Razorpay SDK");
-          console.error("Razorpay SDK load failed.");
           return;
         }
 
@@ -127,7 +140,6 @@ export default function RegisterEventPage() {
           amount: event.registrationFee * 100,
         });
         const { order } = orderRes.data;
-        console.log("Order created:", order);
 
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -137,10 +149,9 @@ export default function RegisterEventPage() {
           description: `Registration for ${event?.title}`,
           order_id: order.id,
           handler: async function (response: any) {
-            console.log("Razorpay payment success:", response);
             try {
               await axios.post(`/api/registration/${eventId}`, {
-                eventModel:'Event',
+                eventModel: "Event",
                 isTeam: event.teamRequired,
                 team: teamData?._id,
                 orderId: response.razorpay_order_id,
@@ -154,15 +165,13 @@ export default function RegisterEventPage() {
               toast.error("Registration failed after payment.");
             }
           },
-          prefill: { name: "", email: "" },
           theme: { color: "#9333ea" },
         };
 
         new (window as any).Razorpay(options).open();
       } else {
-        console.log("Free event detected, calling registration API directly...");
         await axios.post(`/api/registration/${eventId}`, {
-            eventModel:'Event',
+          eventModel: "Event",
           isTeam: event.teamRequired,
           team: teamData?._id,
           orderId: "FREE_EVENT",
@@ -179,6 +188,7 @@ export default function RegisterEventPage() {
       setLoading(false);
     }
   };
+
 
   if (!event) {
     return (
@@ -279,10 +289,9 @@ export default function RegisterEventPage() {
           {loading ? (
             <ClipLoader color="black" size={20} />
           ) : (
-            `Register ${
-              event.registrationFee && event.registrationFee > 0
-                ? `(₹${event.registrationFee})`
-                : ""
+            `Register ${event.registrationFee && event.registrationFee > 0
+              ? `(₹${event.registrationFee})`
+              : ""
             }`
           )}
         </button>

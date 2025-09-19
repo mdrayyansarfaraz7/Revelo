@@ -25,7 +25,8 @@ const subevent = await SubEvent.findById(id)
       { path: "subEventId", model: "SubEvent", select: "title scheduledAt venue" },
       { path: "eventId", model: "Event", select: "title date venue" }
     ],
-  });
+  })
+  .populate("parentEvent", "registrationStarts registrationEnds");
 
     if (!subevent) {
       return NextResponse.json(
