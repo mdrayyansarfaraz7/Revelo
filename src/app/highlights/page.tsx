@@ -40,14 +40,14 @@ export default function Page() {
 const [viewedVideos, setViewedVideos] = useState<Set<string>>(new Set());
 
 const handleVideoProgress = async (video: HTMLVideoElement, videoId: string) => {
-  if (!session?.user?.id) return; // no views if not logged in
+  if (!session?.user?.id) return; 
 
   const progress = (video.currentTime / video.duration) * 100;
 
   // only trigger once per video
   if (progress >= 80 && !viewedVideos.has(videoId)) {
     try {
-      setViewedVideos((prev) => new Set(prev).add(videoId)); // mark as viewed
+      setViewedVideos((prev) => new Set(prev).add(videoId)); 
       await axios.patch(`/api/highlights/${videoId}/views`);
       console.log(`✅ View counted for ${videoId}`);
     } catch (err) {
@@ -90,12 +90,10 @@ const handleVideoProgress = async (video: HTMLVideoElement, videoId: string) => 
 
       const updatedVideo = res.data;
 
-      // ✅ Update highlights grid
       setHighlights((prev) =>
         prev.map((v) => (v._id === videoId ? updatedVideo : v))
       );
 
-      // ✅ Also update selected video if modal is open
       if (selectedVideo?._id === videoId) {
         setSelectedVideo(updatedVideo);
       }

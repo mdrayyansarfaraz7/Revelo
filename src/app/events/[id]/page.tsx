@@ -6,25 +6,27 @@ import axios from "axios";
 import { Calendar, MapPin, Eye, Users } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function EventPage() {
+    const { data: session } = useSession();
   const { id } = useParams();
   const [event, setEvent] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    // Fetch event details
     axios
       .get(`/api/events/${id}`)
       .then((res) => setEvent(res.data))
       .catch((err) => console.error(err));
 
-    // Increment views
-    axios
-      .patch(`/api/events/${id}/views`)
-      .catch((err) => console.error("Error updating views:", err));
-  }, [id]);
+    if (session?.user) {
+      axios
+        .patch(`/api/events/${id}/views`)
+        .catch((err) => console.error("Error updating views:", err));
+    }
+  }, [id, session]);
 
   if (!event)
     return (

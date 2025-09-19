@@ -68,6 +68,8 @@ export default function ReelViewer() {
 
   // Views
   const handleView = async (reelId: string) => {
+    if (!session?.user?.id) return;
+    
     if (viewedReels.has(reelId)) return;
     setViewedReels((prev) => new Set(prev).add(reelId));
 
@@ -80,7 +82,6 @@ export default function ReelViewer() {
     }
   };
 
-  // Auto-play with IntersectionObserver (lazy load)
   const handleIntersect = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
