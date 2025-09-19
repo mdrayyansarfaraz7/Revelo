@@ -72,7 +72,7 @@ export default function FlyerReel() {
   // Views
   const handleView = async (flyerId: string) => {
     if (!session?.user?.id) return; 
-    
+
     if (viewedFlyers.has(flyerId)) return;
 
     setViewedFlyers((prev) => new Set(prev).add(flyerId));
@@ -88,7 +88,6 @@ export default function FlyerReel() {
     }
   };
 
-  // View tracking
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {

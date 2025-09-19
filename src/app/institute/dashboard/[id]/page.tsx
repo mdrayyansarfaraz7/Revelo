@@ -8,6 +8,23 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
+interface Transaction {
+  type: 'ticket' | 'participation';
+  amount: number;
+  platformFee: number;
+  netAmount: number;
+  status: 'pending' | 'settled';
+  createdAt: string; 
+}
+
+interface EventEarnings {
+  eventId: string; 
+  pendingEarnings: number;
+  totalEarnings: number;
+  platformFee: number;
+  transactions: Transaction[];
+}
+
 interface Institute {
   _id: string;
   instituteName: string;
@@ -24,7 +41,9 @@ interface Institute {
   verificationDate: string;
   createdAt: string;
   updatedAt: string;
+  earnings: EventEarnings[];
 }
+
 
 interface Event {
   _id: string;
@@ -103,7 +122,7 @@ export default function InstituteDashboardPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
-  const [unpublishedEvents, setUnpublishedEvents] = useState<Event[]>([]);
+  
 
   useEffect(() => {
     const fetchAndValidate = async () => {
@@ -121,6 +140,8 @@ export default function InstituteDashboardPage() {
 
         const now = new Date();
         const fetchedEvents = data.data.events || [];
+
+
 
         setUpcomingEvents(
           fetchedEvents.filter((event: Event) =>
@@ -142,6 +163,26 @@ export default function InstituteDashboardPage() {
 
     if (id) fetchAndValidate();
   }, [id]);
+
+  console.log(institute);
+const totalEarnings = (institute: Institute): number => {
+  return institute.earnings.reduce((sum, earning) => {
+    return (
+      sum +
+      earning.transactions.reduce(
+        (txSum, tx) => txSum + (tx.netAmount ?? 0),
+        0
+      )
+    );
+  }, 0);
+};
+
+if (institute) {
+  const grandTotal = totalEarnings(institute);
+  console.log("Total Earnings:", grandTotal);
+} else {
+  console.log("Institute not found");
+}
 
   const handleLogout = async () => {
     try {
@@ -173,14 +214,7 @@ export default function InstituteDashboardPage() {
       <header className="bg-[#111111] text-white border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Image src="/logo.png" alt="Logo" width={130} height={40} />
-          <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-300">
-            <Link href="/institute/overview" className="hover:text-white transition">Overview</Link>
-            <Link href="/institute/insights" className="hover:text-white transition">Event Insights</Link>
-            <Link href="/institute/registrations" className="hover:text-white transition">Registrations</Link>
-            <Link href="/institute/engagement" className="hover:text-white transition">User Engagement</Link>
-            <Link href="/institute/performance" className="hover:text-white transition">Performance</Link>
-            <Link href="/institute/feedback" className="hover:text-white transition">Feedback</Link>
-          </nav>
+
         </div>
 
         <div className="flex items-center gap-4">
@@ -222,7 +256,7 @@ export default function InstituteDashboardPage() {
           </div>
           <div className="border border-white/20 rounded-lg p-6 w-64">
             <p className="text-gray-400">Total Revenue:</p>
-            <h2 className="text-3xl font-bold mt-2">₹0</h2>
+            <h2 className="text-3xl font-bold mt-2">₹ {totalEarnings(institute)}</h2>
           </div>
         </div>
       </div>
