@@ -4,6 +4,7 @@ import "keen-slider/keen-slider.min.css";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper"; 
 import { Toaster } from 'sonner'
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           {children}
            <Toaster position="top-right" richColors />
         </SessionWrapper>
+        <Footer/>
       </body>
     </html>
   );

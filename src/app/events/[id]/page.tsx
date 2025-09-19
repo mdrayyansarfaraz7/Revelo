@@ -13,19 +13,27 @@ export default function EventPage() {
 
   useEffect(() => {
     if (!id) return;
+
+    // Fetch event details
     axios
       .get(`/api/events/${id}`)
       .then((res) => setEvent(res.data))
       .catch((err) => console.error(err));
+
+    // Increment views
+    axios
+      .patch(`/api/events/${id}/views`)
+      .catch((err) => console.error("Error updating views:", err));
   }, [id]);
 
-  if (!event) return <p className="text-gray-400 text-center py-10">
-    <ClipLoader size={60} color="#805ad5" />
-  </p>
+  if (!event)
+    return (
+      <p className="text-gray-400 text-center py-10">
+        <ClipLoader size={60} color="#805ad5" />
+      </p>
+    );
 
   const hasSubEvents = event?.subEvents && event.subEvents.length > 0;
-
-  console.log(event);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -40,7 +48,7 @@ export default function EventPage() {
       >
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10">
-          <h1 className="text-8xl font-bold  bg-clip-text text-white md-7">
+          <h1 className="text-8xl font-bold bg-clip-text text-white md-7">
             {event.title}
           </h1>
           <p className="mt-2 text-gray-300">{event.category}</p>
@@ -65,9 +73,7 @@ export default function EventPage() {
               <span className="flex items-center gap-2">
                 <Eye size={18} /> {event.stats.views} Views
               </span>
-              <span className="flex items-center gap-2">
-                <Users size={18} /> {event.stats.totalRegistrations} Registered
-              </span>
+
             </div>
           )}
         </div>
@@ -79,8 +85,9 @@ export default function EventPage() {
         <p className="text-gray-300 leading-relaxed">{event.description}</p>
       </section>
 
-      {/* If event has sub-events */}
+      {/* Sub-events or Register */}
       {hasSubEvents ? (
+        // Sub-events
         <section className="p-8">
           <h2 className="text-2xl font-semibold mb-3">Sub-events</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -101,7 +108,7 @@ export default function EventPage() {
                 <p className="text-gray-400">{sub.venue}</p>
                 <a
                   href={`/subevent/${sub._id}`}
-                  className="mt-3  bg-purple-600 hover:bg-purple-700 w-full py-2 rounded-md text-white flex items-center justify-center"
+                  className="mt-3 bg-purple-600 hover:bg-purple-700 w-full py-2 rounded-md text-white flex items-center justify-center"
                 >
                   View Details
                 </a>
@@ -110,7 +117,7 @@ export default function EventPage() {
           </div>
         </section>
       ) : (
-        // If event is direct/standalone (no sub-events)
+        // Direct/standalone event
         <section className="p-8 max-w-4xl mx-auto">
           {event.rules && (
             <>
@@ -122,63 +129,38 @@ export default function EventPage() {
               </ul>
             </>
           )}
-<div className="mt-10 flex justify-center">
-  <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
-    {event.teamRequired ? (
-      <>
-        <Link href={`/events/${id}/create-team`} className="flex-1">
-          <button
-            className="w-full px-6 py-4 rounded-xl font-semibold text-white
-                       bg-gradient-to-r from-gray-800 to-gray-900
-                       hover:from-gray-700 hover:to-gray-800
-                       shadow-lg hover:shadow-xl
-                       hover:scale-[1.02] transition-all duration-300"
-          >
-            Form a Team
-          </button>
-        </Link>
 
-        <Link href={`/events/${id}/join-team`} className="flex-1">
-          <button
-            className="w-full px-6 py-4 rounded-xl font-semibold text-white
-                       bg-gradient-to-r from-gray-800 to-gray-900
-                       hover:from-gray-700 hover:to-gray-800
-                       shadow-lg hover:shadow-xl
-                       hover:scale-[1.02] transition-all duration-300"
-          >
-            Join a Team
-          </button>
-        </Link>
+          <div className="mt-10 flex justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
+              {event.teamRequired ? (
+                <>
+                  <Link href={`/events/${id}/create-team`} className="flex-1">
+                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                      Form a Team
+                    </button>
+                  </Link>
 
-        <Link href={`/events/${id}/register`} className="flex-1">
-          <button
-            className="w-full px-6 py-4 rounded-xl font-semibold text-white
-                       bg-gradient-to-r from-gray-800 to-gray-900
-                       hover:from-gray-700 hover:to-gray-800
-                       shadow-lg hover:shadow-xl
-                       hover:scale-[1.02] transition-all duration-300"
-          >
-            Register
-          </button>
-        </Link>
-      </>
-    ) : (
-      <Link href={`/events/${id}/register`} className="flex-1">
-        <button
-          className="w-full px-6 py-4 rounded-xl font-semibold text-white
-                     bg-gradient-to-r from-gray-800 to-gray-900
-                     hover:from-gray-700 hover:to-gray-800
-                     shadow-lg hover:shadow-xl
-                     hover:scale-[1.02] transition-all duration-300"
-        >
-          Register
-        </button>
-      </Link>
-    )}
-  </div>
-</div>
+                  <Link href={`/events/${id}/join-team`} className="flex-1">
+                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                      Join a Team
+                    </button>
+                  </Link>
 
-
+                  <Link href={`/events/${id}/register`} className="flex-1">
+                    <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                      Register
+                    </button>
+                  </Link>
+                </>
+              ) : (
+                <Link href={`/events/${id}/register`} className="flex-1">
+                  <button className="w-full px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                    Register
+                  </button>
+                </Link>
+              )}
+            </div>
+          </div>
         </section>
       )}
     </div>

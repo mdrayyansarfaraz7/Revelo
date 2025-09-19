@@ -51,7 +51,7 @@ interface EventData {
     registrations: Registration[];
     registrationFee: number;
     stats: {
-        totalRegistrations: number;
+        
         views: number;
     };
     subEvents: any[];
@@ -205,12 +205,7 @@ export default function EventDetailPage() {
                 </div>
                 {/* Stat Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                    <StatCard
-                        icon={<Users className="text-white w-5 h-5" />}
-                        label="Registrations"
-                        value={`${stats?.totalRegistrations || 0}`}
 
-                    />
 
                     <StatCard
                         icon={<Eye className="text-white w-5 h-5" />}

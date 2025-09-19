@@ -161,15 +161,24 @@ export default function DashboardPage() {
             <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#0e0720]/40 to-[#120a28]/30 ring-1 ring-[#2b1b44] shadow-lg">
               <h4 className="text-sm font-semibold mb-3">Quick Actions</h4>
               <div className="flex flex-col gap-3">
+                <Link href={'/highlights'}>
                 <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
-                  <Calendar size={16} /> Register for Event
+                  <Calendar size={16} /> Check Highlights
                 </button>
+                </Link>
+                <Link href={'/events'}>
                 <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
-                  <Search size={16} /> Browse Contests
+                  <Calendar size={16} /> Browse Events
                 </button>
+                </Link>
+                <Link href={'/tickits'}>
                 <button className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg bg-[#1b1030]/50 hover:bg-[#2b1844]">
                   <CheckCircle size={16} /> Check Passes
                 </button>
+                </Link>
+
+
+
               </div>
             </div>
           </aside>
@@ -322,28 +331,28 @@ function MenuButton({
 
 function EventsTab({ user }: { user: UserType | null }) {
   const participations =
-  user?.participation?.map((p: any) => {
-    const isSubEvent = p.itemType === "SubEvent";
+    user?.participation?.map((p: any) => {
+      const isSubEvent = p.itemType === "SubEvent";
 
-    return {
-      _id: p._id,
-      title: p.itemId?.title,
-      date: isSubEvent ? p.itemId?.scheduledAt : p.itemId?.duration?.[0],
-      venue: isSubEvent ? p.itemId?.venue : p.itemId?.location?.venue,
-      status: "registered",
-    };
-  }) || [];
+      return {
+        _id: p._id,
+        title: p.itemId?.title,
+        date: isSubEvent ? p.itemId?.scheduledAt : p.itemId?.duration?.[0],
+        venue: isSubEvent ? p.itemId?.venue : p.itemId?.location?.venue,
+        status: "registered",
+      };
+    }) || [];
 
-console.log(participations);
+  console.log(participations);
 
-const upcoming = participations.filter(
-  (e) => e.date && new Date(e.date) > new Date()
-);
-console.log(upcoming);
+  const upcoming = participations.filter(
+    (e) => e.date && new Date(e.date) > new Date()
+  );
+  console.log(upcoming);
 
-const past = participations.filter(
-  (e) => e.date && new Date(e.date) <= new Date()
-);
+  const past = participations.filter(
+    (e) => e.date && new Date(e.date) <= new Date()
+  );
 
   const Section = ({
     title,
@@ -410,7 +419,7 @@ const past = participations.filter(
 
 
 function TeamsTab({ user }: { user: UserType | null }) {
-  // filter out teams whose event is already completed
+
   const activeTeams =
     user?.teams?.filter((t: any) => {
       if (!t.eventRef?.date) return true;
@@ -509,7 +518,7 @@ function TeamsTab({ user }: { user: UserType | null }) {
 
 function TicketsTab({ user }: { user: UserType | null }) {
   return (
-<Card title="Booked Tickets">
+    <Card title="Booked Tickets">
       {user?.tickets && user.tickets.length ? (
         <ul className="space-y-4">
           {user.tickets.map((t: any) => (
