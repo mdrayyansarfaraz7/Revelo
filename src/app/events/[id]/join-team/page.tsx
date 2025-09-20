@@ -1,11 +1,7 @@
 import JoinTeamForm from "@/components/JoinTeamForm";
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
 
-export default function Page({ params }: Props) {
+
+export default function Page({ params }: any) {
   return <JoinTeamForm type="event" id={params.id} />;
 }

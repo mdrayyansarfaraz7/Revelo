@@ -1,12 +1,7 @@
 
 import TeamForm from "@/components/TeamForm";
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
 
-export default function Page({ params }: Props) {
+export default function Page({ params }: any) {
   return <TeamForm type="event" id={params.id} />;
 }
