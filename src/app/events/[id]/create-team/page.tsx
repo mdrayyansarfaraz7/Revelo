@@ -1,6 +1,5 @@
-import TeamForm from "@/components/TeamForm";
-
 "use client";
+import TeamForm from "@/components/TeamForm";
 
 export default function CreateEventTeamPage({ params }: { params: { id: string } }) {
   return (

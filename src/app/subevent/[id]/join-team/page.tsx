@@ -1,3 +1,4 @@
+"use client";
 import JoinTeamForm from "@/components/JoinTeamForm";
 
 "use client";

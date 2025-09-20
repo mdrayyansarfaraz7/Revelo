@@ -1,6 +1,7 @@
-import TeamForm from "@/components/TeamForm";
 
 "use client";
+import TeamForm from "@/components/TeamForm";
+
 
 export default function Page({ params }: { params: { id: string } }) {
   return (
