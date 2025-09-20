@@ -1,5 +1,9 @@
 import JoinTeamForm from "@/components/JoinTeamForm";
 
-export default function JoinTeamSubEventPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: { id: string };
+}
+
+export default function JoinTeamSubEventPage({ params }: PageProps) {
   return <JoinTeamForm type="subevent" id={params.id} />;
 }
