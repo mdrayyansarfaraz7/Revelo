@@ -8,5 +8,5 @@ interface PageProps {
 }
 
 export default function Page({ params }: PageProps) {
-  return <TeamForm type="subevent" id={params.id} />;
+  return <TeamForm type="event" id={params.id} />;
 }
