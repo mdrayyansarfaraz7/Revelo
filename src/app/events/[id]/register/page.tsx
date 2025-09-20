@@ -146,6 +146,7 @@ export default function RegisterEventPage() {
           amount: order.amount,
           currency: "INR",
           name: "Revelo",
+          image: "/favicon.png",
           description: `Registration for ${event?.title}`,
           order_id: order.id,
           handler: async function (response: any) {

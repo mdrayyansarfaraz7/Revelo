@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import TrustedByInstitutes from "@/components/TrustedByInstitutes";
 import ParticipateEvents from "@/components/ParticipateEvents";
 import InstituteRegistration from "@/components/InstituteRegistration";
+import Footer from "@/components/Footer";
 
 
 
@@ -62,7 +63,7 @@ function page() {
       <ParticipateEvents/>
        <TrustedByInstitutes/>
        <InstituteRegistration/>
-      
+      <Footer/>
     </div>
   )
 }

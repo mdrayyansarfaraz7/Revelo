@@ -199,6 +199,7 @@ function Page() {
         name: "Revelo",
         description: "Platform Fee for Event Creation",
         order_id: order.id,
+        image: "/favicon.png",
         handler: async function (response: any) {
           try {
             await handleSubmitAfterPayment({

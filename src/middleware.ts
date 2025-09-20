@@ -1,4 +1,4 @@
-// middleware.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -21,30 +21,70 @@ export async function middleware(request: NextRequest) {
     request.cookies.get("next-auth.session-token")?.value ||
     request.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  // INSTITUTE ROUTES (except login + register)
-  if (
-    pathname.startsWith("/institute") &&
-    pathname !== "/institute/login" &&
-    pathname !== "/institute/register"
-  ) {
+
+
+  // Institute routes (except login/register)
+if (["/institute/login", "/institute/register"].includes(pathname)) {
+  if (instituteToken) {
     const payload = await verifyToken(instituteToken, process.env.JWT_SECRET);
-    if (!payload) {
-      return NextResponse.redirect(new URL("/institute/login", request.url));
+    if (payload) {
+      // Optional: check for a `next` query parameter
+      const nextUrl = request.nextUrl.searchParams.get("next");
+      const redirectTo = nextUrl || `/institute/dashboard/${payload.id}`;
+      return NextResponse.redirect(new URL(redirectTo, request.url));
     }
   }
+}
 
-  // ADMIN ROUTES (except login)
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const adminPayload = await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET);
-    if (!adminPayload) {
-      return NextResponse.redirect(new URL("/", request.url));
+  // Admin routes (except login)
+if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  const payload = await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET);
+  if (!payload) {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+}
+
+if (pathname === "/admin/login") {
+  if (adminToken) {
+    const payload = await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET);
+    if (payload) {
+      return NextResponse.redirect(new URL("/admin/panel", request.url));
     }
   }
+}
 
-  // USER DASHBOARD (NextAuth)
+  // User dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!nextAuthToken) {
       return NextResponse.redirect(new URL("/auth/signin", request.url));
+    }
+  }
+
+
+  // User login/signup
+  if (["/auth/signin", "/auth/signup"].includes(pathname)) {
+    if (nextAuthToken) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  // Institute login/register
+  if (["/institute/login", "/institute/register"].includes(pathname)) {
+    if (instituteToken) {
+      const payload = await verifyToken(instituteToken, process.env.JWT_SECRET);
+      if (payload) {
+        return NextResponse.redirect(new URL("/institute", request.url));
+      }
+    }
+  }
+
+  // Admin login
+  if (pathname === "/admin/login") {
+    if (adminToken) {
+      const payload = await verifyToken(adminToken, process.env.ADMIN_JWT_SECRET);
+      if (payload) {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
     }
   }
 
@@ -52,5 +92,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/institute/:path*", "/admin/:path*", "/dashboard/:path*"],
+  matcher: ["/institute/:path*", "/admin/:path*", "/dashboard/:path*", "/auth/:path*"],
 };

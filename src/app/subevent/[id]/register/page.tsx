@@ -122,6 +122,7 @@ const handleRegister = async () => {
         amount: order.amount,
         currency: "INR",
         name: "Revelo",
+        image: "/favicon.png",
         description: `Registration for ${subEvent?.title}`,
         order_id: order.id,
         handler: async function (response: any) {

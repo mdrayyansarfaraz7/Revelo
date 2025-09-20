@@ -10,6 +10,7 @@ import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import "./globals.css";
 import InstituteRegistration from "@/components/InstituteRegistration";
+import Footer from "@/components/Footer";
 
 // Event type
 type EventType = {
@@ -293,7 +294,7 @@ export default function Home() {
 
 <InstituteRegistration/>
 
-
+<Footer/>
 
     </div>
   );
