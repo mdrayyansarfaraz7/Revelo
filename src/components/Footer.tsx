@@ -6,12 +6,12 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-b from-[#111111] to-[#1a1a1a] text-gray-400 pt-16 pb-6 px-6">
       <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
-        
-      
+
+
         <div>
           <Link href="/" className="inline-block">
             <Image
-              src="/logo.png" 
+              src="/logo.png"
               alt="Revelo Logo"
               width={150}
               height={50}
@@ -27,19 +27,31 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-semibold text-lg mb-4">Explore</h3>
           <ul className="space-y-2">
-            <li><Link href="/events" className="hover:text-purple-400">Events</Link></li>
-            <li><Link href="/institutes" className="hover:text-purple-400">Institutes</Link></li>
-            <li><Link href="/about" className="hover:text-purple-400">About</Link></li>
-            <li><Link href="/contact" className="hover:text-purple-400">Contact</Link></li>
+            <li>
+              <Link href="/" className="hover:text-purple-400 transition">Home</Link>
+            </li>
+            <li>
+              <Link href="/events" className="hover:text-purple-400 transition">Events</Link>
+            </li>
+            <li>
+              <Link href="/highlights" className="hover:text-purple-400 transition">Highlights</Link>
+            </li>
+            <li>
+              <Link href="/tickets" className="hover:text-purple-400 transition">Passes</Link>
+            </li>
+            <li>
+              <Link href="/reels" className="hover:text-purple-400 transition">Reels</Link>
+
+            </li>
           </ul>
         </div>
 
         {/* Legal */}
         <div>
-          <h3 className="text-white font-semibold text-lg mb-4">Legal</h3>
+          <h3 className="text-white font-semibold text-lg mb-4">Quick Links</h3>
           <ul className="space-y-2">
-            <li><Link href="/privacy" className="hover:text-purple-400">Privacy Policy</Link></li>
-            <li><Link href="/terms" className="hover:text-purple-400">Terms & Conditions</Link></li>
+            <li><Link href="/institute/register" className="hover:text-purple-400">Register Your Institute</Link></li>
+            <li><Link href="/landing" className="hover:text-purple-400">Know About Revelo</Link></li>
           </ul>
         </div>
 

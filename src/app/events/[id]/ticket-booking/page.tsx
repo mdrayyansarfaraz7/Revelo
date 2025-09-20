@@ -8,6 +8,7 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import Header from '@/components/Header';
 import { loadRazorpayScript } from '../../../../lib/rozorpay';
 import { toast } from 'sonner';
+import { useSession } from "next-auth/react";
 
 interface EventType {
   _id: string;
@@ -18,6 +19,7 @@ interface EventType {
 
 export default function TicketBookingPage() {
   const { id } = useParams();
+    const { data: session } = useSession();
   const [event, setEvent] = useState<EventType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,6 +62,11 @@ export default function TicketBookingPage() {
   const handlePayment = async () => {
     if (!event) return;
 
+    if (!session?.user?.id) {
+      router.push("/auth/signin");
+      return;
+    }
+
     const res = await loadRazorpayScript();
     if (!res) {
       toast.error('Razorpay SDK failed to load. Check your internet connection.');
@@ -80,7 +87,7 @@ export default function TicketBookingPage() {
         currency: order.currency,
         name: 'Revelo',
         description: `Tickets for ${event.title}`,
-        image: '/logo.png',
+        image: '/favicon.png',
         order_id: order.id,
         handler: async function (response: any) {
           try {

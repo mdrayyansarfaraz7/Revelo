@@ -57,7 +57,7 @@ export default function EventPage() {
       >
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10">
-          <h1 className="text-8xl font-bold bg-clip-text text-white md-7">
+          <h1 className="text-5xl lg:text-8xl font-bold bg-clip-text text-white md-7">
             {event.title}
           </h1>
           <p className="mt-2 text-gray-300">{event.category}</p>

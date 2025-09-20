@@ -583,47 +583,64 @@ function TicketsTab({ user }: { user: UserType | null }) {
 
 function ProfileTab({ user }: { user: UserType | null }) {
   return (
-    <Card title="Profile">
-      <div className="flex gap-6 items-center">
-        <div className="relative w-24 h-24 rounded-2xl overflow-hidden ring-1 ring-[#2b2340] flex-shrink-0">
-          {user?.profilePicture ? (
-            <Image src={user.profilePicture} alt="avatar" fill sizes="96px" className="object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-tr from-[#2b2340] to-[#3b2b55] flex items-center justify-center">
-              <User className="opacity-80" size={36} />
-            </div>
-          )}
+<Card title="Profile">
+  <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+    {/* Avatar */}
+    <div className="relative w-24 h-24 rounded-2xl overflow-hidden ring-1 ring-[#2b2340] flex-shrink-0">
+      {user?.profilePicture ? (
+        <Image
+          src={user.profilePicture}
+          alt="avatar"
+          fill
+          sizes="96px"
+          className="object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-tr from-[#2b2340] to-[#3b2b55] flex items-center justify-center">
+          <User className="opacity-80" size={36} />
         </div>
+      )}
+    </div>
 
-        <div className="flex-1 grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-xs text-[#b9aee0]">Full name</p>
-            <p className="mt-1 font-medium">{user?.name || user?.fullName || '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-[#b9aee0]">Email</p>
-            <p className="mt-1 font-medium">{user?.email || '—'}</p>
-          </div>
-
-          <div>
-            <p className="text-xs text-[#b9aee0]">Institute</p>
-            <p className={`mt-1 font-medium ${!user?.instituteName ? 'text-[#ffb4b4]' : ''}`}>{user?.instituteName || 'Not added'}</p>
-          </div>
-
-          <div>
-            <p className="text-xs text-[#b9aee0]">Verified</p>
-            <p className="mt-1 font-medium">{user?.isVerified ? 'Yes' : 'No'}</p>
-          </div>
-
-          <div className="col-span-2 mt-2">
-            <Link href={'/dashboard/update-profile'}>
-              <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#5b3bff] to-[#9178ff] text-black font-semibold">Edit profile</button>
-            </Link>
-
-          </div>
-        </div>
+    {/* Info grid */}
+    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+      <div>
+        <p className="text-xs text-[#b9aee0]">Full name</p>
+        <p className="mt-1 font-medium">{user?.name || user?.fullName || '—'}</p>
       </div>
-    </Card>
+
+      <div>
+        <p className="text-xs text-[#b9aee0]">Email</p>
+        <p className="mt-1 font-medium">{user?.email || '—'}</p>
+      </div>
+
+      <div>
+        <p className="text-xs text-[#b9aee0]">Institute</p>
+        <p
+          className={`mt-1 font-medium ${
+            !user?.instituteName ? 'text-[#ffb4b4]' : ''
+          }`}
+        >
+          {user?.instituteName || 'Not added'}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs text-[#b9aee0]">Verified</p>
+        <p className="mt-1 font-medium">{user?.isVerified ? 'Yes' : 'No'}</p>
+      </div>
+
+      <div className="col-span-1 sm:col-span-2 mt-2">
+        <Link href="/dashboard/update-profile">
+          <button className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gradient-to-r from-[#5b3bff] to-[#9178ff] text-black font-semibold">
+            Edit profile
+          </button>
+        </Link>
+      </div>
+    </div>
+  </div>
+</Card>
+
   );
 }
 
