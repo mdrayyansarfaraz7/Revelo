@@ -1,10 +1,12 @@
 import TeamForm from "@/components/TeamForm";
 
-interface PageParams {
-  id: string;
+interface PageProps {
+  params: {
+    id: string;
+  };
 }
-//changed
-export default function CreateEventTeamPage({ params }: { params: PageParams }) {
+
+export default function CreateEventTeamPage({ params }: PageProps) {
   return (
     <div>
       <TeamForm type="event" id={params.id} />
