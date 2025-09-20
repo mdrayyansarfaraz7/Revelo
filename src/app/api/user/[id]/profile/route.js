@@ -12,7 +12,6 @@ export async function GET(req, { params }) {
       .populate("instituteRef")
       .populate("teams")
       .populate("participation")
-      .populate("coordinatorFor");
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
